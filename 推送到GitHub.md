@@ -1,54 +1,69 @@
-# 推送到 GitHub（3 步，约 2 分钟）
+# 推送到 GitHub —— 目标仓库已指定
 
-本文档要求「（必含）代码链接（github）」，且权限需为 **public**。
-`repo/` 目录已经准备好（**已脱敏，不含任何 API Key**），照下面做即可。
+目标仓库：**https://github.com/n7727gkzds-cell/xueliang**（已确认存在、可匿名访问 = 已设为 Public，当前为空仓库）
 
-## 前提
-- 已安装 Git；已登录 github.com 账号
+`repo/` 目录已脱敏（不含任何 API Key），且**本地 Git 仓库已初始化、代码已提交**，只差最后一步 push。
 
-## 第 1 步：在 GitHub 上建空仓库
-1. 打开 https://github.com/new
-2. Repository name 填：`forge-atoms-demo`
-3. 选择 **Public**
-4. **不要**勾选 "Add a README file" / ".gitignore" / "license"（保持空仓库）
-5. 点 Create repository，记下你的仓库地址，形如：
-   - HTTPS：`https://github.com/<你的用户名>/forge-atoms-demo.git`
-   - SSH：`git@github.com:<你的用户名>/forge-atoms-demo.git`
+## 现在的进度
 
-## 第 2 步：在本目录执行（把 `<你的用户名>` 换成真实用户名）
+- ✅ 第 1 步：GitHub 建空仓库 —— 已完成（仓库 xueliang 已存在且 Public）
+- ✅ 第 2 步：`git init` + `add` + `commit` —— 已完成
+  - 分支：`main`
+  - 提交：`3cf6bf1 feat: Forge AI App Studio - Atoms-Demo for ROOT fullstack assessment`
+  - remote：`origin → https://github.com/n7727gkzds-cell/xueliang.git`
+  - 已跟踪 7 个文件：`index.html` `styles.css` `app.js` `engine.js` `server.js` `README.md` `.gitignore`
+- ⏳ 第 3 步：`git push` —— 需要提供 GitHub 凭证（本机没有保存任何 GitHub 凭证，故未完成）
+
+## 第 3 步：push（二选一）
+
+### 方式 A：命令行（推荐）
+
+GitHub 已不支持用账号密码 push，需要 **Personal Access Token**：
+
+1. 打开 https://github.com/settings/tokens → **Generate new token (classic)**
+2. 勾选 **`repo`**（读写仓库），生成并**复制** token（形如 `ghp_xxxx...`，只显示一次）
+3. 在本目录执行：
 
 ```bash
 cd "C:/Users/Administrator/Desktop/Forge-Atoms-Demo-提交包/repo"
-
-git init
-git add .
-git commit -m "feat: Forge - AI App Studio (Atoms-Demo)"
-
-git branch -M main
-git remote add origin https://github.com/<你的用户名>/forge-atoms-demo.git
 git push -u origin main
 ```
 
-> 若用 SSH：`git remote add origin git@github.com:<你的用户名>/forge-atoms-demo.git`
+4. 弹出登录窗口时：**用户名**填 `n7727gkzds-cell`，**密码**填刚才的 token（不是登录密码）
 
-## 第 3 步：确认并回填文档
-1. 打开 `https://github.com/<你的用户名>/forge-atoms-demo` 确认文件齐全、仓库为 Public
-2. 把该地址填回两份笔试文档的「（必含）代码链接（github）」处：
+> 若报证书/吊销检查错误（本机网络环境常见），可加参数重试：
+> `git -c http.sslVerify=false push -u origin main`
+
+### 方式 B：网页拖拽上传（不用配凭证）
+
+1. 打开 https://github.com/n7727gkzds-cell/xueliang
+2. 点 **uploading an existing file**（或 **Add file → Upload files**）
+3. 把本目录下这 6 个文件拖进去：`index.html` `styles.css` `app.js` `engine.js` `server.js` `README.md`
+4. 底部填一句 commit 信息 → **Commit changes**
+
+## 第 4 步：确认 + 回填（回填已完成）
+
+1. 打开 https://github.com/n7727gkzds-cell/xueliang 确认文件齐全、仓库右上角显示 **Public**
+2. 两份笔试文档的「（必含）代码链接（GitHub）」**已回填**为该地址：
    - `笔试文档-ROOT全栈岗位笔试.md`
    - `笔试文档-ROOT全栈岗位笔试.html`
-3. 顺手确认在线链接已填：`https://2108109949544263680.app.workbuddy.host/`
+   - 根目录 `README.md` / `提交说明.html` 也已同步
+3. 在线链接（已部署）：https://2108109949544263680.app.workbuddy.host/
 
 ## 常见问题
-- **push 提示认证失败**：GitHub 已不支持账号密码 push，请在 GitHub → Settings → Developer settings → Personal access tokens 生成 token，push 时用 token 作为密码；或改用 SSH key。
-- **想检查是否误传密钥**：推送前可在本目录执行 `grep -r "sk-" .`，应无输出（当前版本已确认无密钥）。
+
+- **认证失败**：确认用户名是 `n7727gkzds-cell`、密码填的是 token 而非登录密码；token 必须有 `repo` 权限。
+- **SSH push 报 port 22 refused**：本机网络屏蔽了 22 端口，请改用上面的 HTTPS（方式 A 的第 4 点）或方式 B。
+- **想确认没误传密钥**：本目录执行 `grep -r "sk-" .`，应无输出（当前版本已确认无密钥）。
 
 ## 仓库应包含的文件
+
 ```
+README.md    项目说明
 index.html   界面
 styles.css   样式
 app.js       智能体 / 生成 / 版本 / 发布 / 附件 / 初始化引导
 engine.js    本地规则引擎（8 类应用模板 + 9 套配色）
 server.js    本地代理（静态托管 + /api/llm 转发）
-README.md    项目说明
 .gitignore
 ```
