@@ -23,6 +23,193 @@
 
   const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
+  /* ============================================================
+     账号体系：登录 / 注册 / 登出 + 服务端数据同步
+     ============================================================ */
+  let me = null;                 // 当前登录用户，null = 游客
+  let syncState = "local";       // local | saving | saved | error
+  let syncTimer = null;
+
+  async function api(path, opts) {
+    const o = Object.assign({ credentials: "same-origin", headers: {} }, opts || {});
+    if (o.body && typeof o.body === "object") {
+      o.headers["Content-Type"] = "application/json";
+      o.body = JSON.stringify(o.body);
+    }
+    let r;
+    try { r = await fetch(path, o); }
+    catch (e) { return { ok: false, status: 0, data: { error: "连不上本地服务，请确认 server.js 已启动" } }; }
+    const txt = await r.text();
+    let data = null;
+    try { data = JSON.parse(txt); } catch (e) { data = { raw: txt }; }
+    return { ok: r.ok, status: r.status, data: data || {} };
+  }
+
+  async function checkAuth() {
+    const r = await api("/api/auth/me");
+    if (r.ok && r.data && r.data.authAvailable) { me = r.data.user || null; return true; }
+    return false;
+  }
+
+  function collectState() {
+    return {
+      brief: { audience: brief.audience, goal: brief.goal, pref: brief.pref, files: [] },
+      versions: versions,
+      curVer: curVer,
+      published: published,
+      last: lastHTML ? { html: lastHTML, title: stageTitle.textContent, v: curVer, t: Date.now() } : null
+    };
+  }
+
+  function scheduleSync() {
+    if (!me) { syncState = "local"; renderAcct(); return; }
+    syncState = "saving"; renderAcct();
+    clearTimeout(syncTimer);
+    syncTimer = setTimeout(async () => {
+      const r = await api("/api/state", { method: "PUT", body: { state: collectState() } });
+      syncState = r.ok ? "saved" : "error";
+      renderAcct();
+    }, 700);
+  }
+
+  async function pullState() {
+    if (!me) return false;
+    const r = await api("/api/state");
+    if (!r.ok || !r.data || !r.data.state) return false;
+    const st = r.data.state;
+    if (st.brief) {
+      brief = { audience: st.brief.audience || "", goal: st.brief.goal || "", pref: st.brief.pref || "", files: brief.files || [] };
+      $("#bAudience").value = brief.audience;
+      $("#bGoal").value = brief.goal;
+      $("#bPref").value = brief.pref;
+      renderBrief();
+    }
+    if (Array.isArray(st.versions) && st.versions.length) {
+      versions = st.versions;
+      curVer = st.curVer || versions.length;
+    }
+    if (st.published) published = st.published;
+    if (st.last && st.last.html) {
+      lastHTML = st.last.html;
+      preview.srcdoc = withNavGuard(lastHTML);
+      setCode(lastHTML);
+      stageTitle.textContent = st.last.title || "应用";
+      appKind.textContent = "云端恢复";
+      publishBtn.disabled = false;
+      empty.classList.add("gone");
+      updateVerBadge();
+    }
+    updateVerBadge();
+    return !!(st.last && st.last.html);
+  }
+
+  function renderAcct() {
+    const name = me ? (me.name || me.email.split("@")[0]) : "游客";
+    const initial = (name || "?").trim().slice(0, 1).toUpperCase();
+    $("#acctName").textContent = me ? name : "未登录";
+    $("#acctName2").textContent = name;
+    $("#acctAvatar").textContent = initial;
+    $("#acctAvatar2").textContent = initial;
+    $("#acctEmail").textContent = me ? me.email : "数据仅存在本机浏览器";
+    $("#logoutItem").hidden = !me;
+    $("#loginItem").hidden = !!me;
+    const map = {
+      local: "本地模式 · 数据存本机",
+      saving: "正在同步到云端…",
+      saved: "已同步到云端 · " + new Date().toLocaleTimeString("zh-CN", { hour: "2-digit", minute: "2-digit" }),
+      error: "同步失败（数据仍在本地）"
+    };
+    $("#acctSync").textContent = map[syncState] || map.local;
+    $("#acctSync").className = "acct-sync " + syncState;
+  }
+
+  function enterApp() {
+    $("#authGate").classList.add("gone");
+    $("#appShell").hidden = false;
+    renderAcct();
+  }
+  function enterGuest() {
+    me = null; syncState = "local";
+    enterApp();
+    addMsg("bot", "你现在是<b>游客模式</b>，数据只存在这台电脑的浏览器里。右上角头像里可以登录，登录后项目、版本和发布记录会同步到服务端，换台电脑也能接着改。");
+  }
+
+  /* ---- auth UI ---- */
+  let authTab = "login";
+  function setAuthTab(t) {
+    authTab = t;
+    document.querySelectorAll(".auth-tabs button").forEach((b) => b.classList.toggle("active", b.dataset.tab === t));
+    $("#fldName").hidden = t !== "reg";
+    $("#fldPw2").hidden = t !== "reg";
+    $("#authSubmit").textContent = t === "reg" ? "注册并进入" : "登录";
+    $("#authMsg").textContent = "";
+  }
+  document.querySelectorAll(".auth-tabs button").forEach((b) =>
+    b.addEventListener("click", () => setAuthTab(b.dataset.tab))
+  );
+  $("#fillDemo").addEventListener("click", () => {
+    setAuthTab("login");
+    $("#authEmail").value = "demo@forge.app";
+    $("#authPw").value = "demo1234";
+    $("#authMsg").textContent = "已填入测试账号，点登录即可";
+  });
+  $("#guestBtn").addEventListener("click", enterGuest);
+
+  $("#authSubmit").addEventListener("click", async () => {
+    const email = $("#authEmail").value.trim();
+    const pw = $("#authPw").value;
+    const btn = $("#authSubmit");
+    if (!email || !pw) { $("#authMsg").textContent = "邮箱和密码都要填"; return; }
+    btn.disabled = true; btn.textContent = "处理中…";
+    let r;
+    if (authTab === "reg") {
+      const name = $("#authName").value.trim() || email.split("@")[0];
+      if (pw !== $("#authPw2").value) {
+        $("#authMsg").textContent = "两次密码不一致";
+        btn.disabled = false; btn.textContent = "注册并进入"; return;
+      }
+      r = await api("/api/auth/register", { method: "POST", body: { name, email, password: pw } });
+    } else {
+      r = await api("/api/auth/login", { method: "POST", body: { email, password: pw } });
+    }
+    btn.disabled = false; btn.textContent = authTab === "reg" ? "注册并进入" : "登录";
+    if (!r.ok) {
+      $("#authMsg").textContent = (r.data && r.data.error) || "登录失败";
+      return;
+    }
+    me = r.data.user;
+    syncState = "saved";
+    enterApp();
+    await pullState();
+    toast("已登录：" + (me.name || me.email));
+    if (!lastHTML) {
+      addMsg("bot", "登录成功 👋 你的项目简报、版本历史和发布记录都会存在服务端，换台电脑登录就能接着改。");
+    }
+  });
+
+  $("#acctBtn").addEventListener("click", (e) => {
+    e.stopPropagation();
+    const m = $("#acctMenu");
+    m.hidden = !m.hidden;
+  });
+  document.addEventListener("click", () => { $("#acctMenu").hidden = true; });
+  $("#acctMenu").addEventListener("click", (e) => e.stopPropagation());
+  $("#logoutItem").addEventListener("click", async () => {
+    await api("/api/auth/logout", { method: "POST" });
+    me = null; syncState = "local";
+    $("#acctMenu").hidden = true;
+    $("#authGate").classList.remove("gone");
+    $("#appShell").hidden = true;
+    renderAcct();
+  });
+  $("#loginItem").addEventListener("click", () => {
+    $("#acctMenu").hidden = true;
+    $("#authGate").classList.remove("gone");
+    $("#appShell").hidden = true;
+  });
+  $("#authEmail").addEventListener("keydown", (e) => { if (e.key === "Enter") $("#authSubmit").click(); });
+  $("#authPw").addEventListener("keydown", (e) => { if (e.key === "Enter") $("#authSubmit").click(); });
+
   /* ---------- UI helpers ---------- */
   function toast(msg) {
     const t = $("#toast");
@@ -37,14 +224,43 @@
   }
   function addAgent(title, icon) {
     const el = document.createElement("div");
-    el.className = "agent";
-    el.innerHTML = `<div class="ic">${icon || "🤖"}</div><div class="body"><div class="role">${title || "智能体"}</div><div class="txt"><span class="typing"><i></i><i></i><i></i></span></div></div>`;
-    thread.appendChild(el); thread.scrollTop = thread.scrollHeight; return el;
+    el.className = "agent running";
+    el.innerHTML = '<div class="ic">' + (icon || "🤖") + '</div><div class="body"><div class="role">' +
+      (title || "智能体") + '<span class="cost"></span></div><div class="txt"><span class="typing"><i></i><i></i><i></i></span></div></div>';
+    thread.appendChild(el); thread.scrollTop = thread.scrollHeight;
+    el._t0 = Date.now();
+    return el;
   }
   function setAgent(el, html, done) {
     el.querySelector(".txt").innerHTML = html;
-    if (done) el.classList.add("done");
+    if (done) {
+      el.classList.add("done"); el.classList.remove("running");
+      const ms = el._t0 ? Date.now() - el._t0 : 0;
+      const c = el.querySelector(".cost");
+      if (c) c.textContent = ms < 1000 ? ms + "ms" : (ms / 1000).toFixed(1) + "s";
+    }
     thread.scrollTop = thread.scrollHeight;
+  }
+  /* 智能体的结构化产出物，点开能看到它到底做了什么 */
+  function renderArtifact(el, art) {
+    if (!el || !art || !art.rows) return;
+    const box = document.createElement("div");
+    box.className = "artifact";
+    box.hidden = true;
+    box.innerHTML = '<div class="art-title">' + escapeHTML(art.label) + "</div>" +
+      art.rows.map((r) =>
+        '<div class="art-row"><span>' + escapeHTML(String(r[0])) + "</span><b>" + escapeHTML(String(r[1])) + "</b></div>"
+      ).join("");
+    const btn = document.createElement("button");
+    btn.className = "art-toggle";
+    btn.innerHTML = '<span class="art-label">查看产出物</span><span class="art-c">▾</span>';
+    btn.addEventListener("click", () => {
+      box.hidden = !box.hidden;
+      btn.classList.toggle("open", !box.hidden);
+      thread.scrollTop = thread.scrollHeight;
+    });
+    el.querySelector(".body").appendChild(btn);
+    el.querySelector(".body").appendChild(box);
   }
 
   /* ---------- agent plan: human-like narration ---------- */
@@ -65,11 +281,58 @@
     const planner = isRefine
       ? `我顺着你上一条往下想：在「<b>${meta.name}</b>」的基础上应用这个调整，已经好看的结构我尽量不动，只改你点名的地方。`
       : `我读了一下——你想要的是 <b>${meta.kindLabel}</b>，主角叫「<b>${meta.name}</b>」。我先把结构在脑子里理一遍：首屏负责"一眼懂"，下面再分模块讲清楚，整体语气往「<b>${meta.tone}</b>」靠。`;
+    const secNames = ["首屏", "核心内容", "亮点模块", "详情区块", "信任背书", "行动引导", "补充说明"];
+    const modules = secNames.slice(0, Math.max(3, Math.min(sec, secNames.length))).join(" / ");
     return [
-      { icon: "🧭", title: "规划 · Planner", html: planner },
-      { icon: "🎨", title: "设计 · Designer", html: `配色我纠结了一下，最后选了 <b>${meta.paletteName}</b>。${reason}主色用渐变，首屏我准备放一团柔光做氛围，不抢内容；手机上的可读性我也先想到了。` },
-      { icon: "⚙️", title: "构建 · Builder", html: `开始动手了——导航、首屏、各模块卡片、页脚都搭好，移动端我顺手做了汉堡菜单，手机上能正常展开。代码是自包含的，<b>不用后端也能跑</b>，你导出就能直接用。` },
-      { icon: "🔍", title: "评审 · Reviewer", html: `我自检了一遍：手机布局 <b>✓</b> · 键盘能点到 <b>✓</b> · 没有外链依赖 <b>✓</b>。有个小提醒——真实内容（营业时间、价格这些）你之后在导出文件里改一下就行，我不替你编数据 😉` }
+      {
+        icon: "🧭", title: "规划 · Planner", html: planner,
+        artifact: {
+          label: "需求拆解",
+          rows: [
+            ["应用类型", meta.kindLabel || "网页应用"],
+            ["主要目标", meta.name || "未命名"],
+            ["页面模块", modules],
+            ["这次不做", "登录注册、支付、真实后端数据"]
+          ]
+        }
+      },
+      {
+        icon: "🎨", title: "设计 · Designer", html: `配色我纠结了一下，最后选了 <b>${meta.paletteName}</b>。${reason}主色用渐变，首屏我准备放一团柔光做氛围，不抢内容；手机上的可读性我也先想到了。`,
+        artifact: {
+          label: "设计规格",
+          rows: [
+            ["配色方案", meta.paletteName || "默认"],
+            ["语气", meta.tone || "亲和"],
+            ["布局", "单列流式，区块间距统一"],
+            ["圆角 / 阴影", "12px 圆角 · 柔和阴影"],
+            ["断点", "768px 以下切移动端布局"]
+          ]
+        }
+      },
+      {
+        icon: "⚙️", title: "构建 · Builder", html: `开始动手了——导航、首屏、各模块卡片、页脚都搭好，移动端我顺手做了汉堡菜单，手机上能正常展开。代码是自包含的，<b>不用后端也能跑</b>，你导出就能直接用。`,
+        artifact: {
+          label: "构建结果",
+          rows: [
+            ["产物", "单文件 index.html（内联样式与脚本）"],
+            ["结构", "导航 + " + Math.max(3, Math.min(sec, 7)) + " 个区块 + 页脚"],
+            ["移动端", "汉堡菜单 · 768px 断点"],
+            ["外部依赖", "0 个，离线可直接打开"]
+          ]
+        }
+      },
+      {
+        icon: "🔍", title: "评审 · Reviewer", html: `我自检了一遍：手机布局 <b>✓</b> · 键盘能点到 <b>✓</b> · 没有外链依赖 <b>✓</b>。有个小提醒——真实内容（营业时间、价格这些）你之后在导出文件里改一下就行，我不替你编数据 😉`,
+        artifact: {
+          label: "自检报告",
+          rows: [
+            ["移动端布局", "通过"],
+            ["键盘可达", "通过"],
+            ["外部依赖", "0 个"],
+            ["待补真实信息", "营业时间 / 价格 / 联系方式"]
+          ]
+        }
+      }
     ];
   }
 
@@ -85,6 +348,7 @@
     if (cloudEnabled()) {
       const ac = new AbortController();
       currentAbort = ac;
+      const t0 = Date.now();
       const timeout = setTimeout(() => ac.abort(new Error("生成超时（5 分钟）")), 300000);
       const thinkEl = addAgent("构建 · Builder", "⚙️");
       setAgent(thinkEl, "正在连接云端模型…（生成期间再点一次发送按钮可中断）");
@@ -148,6 +412,15 @@
         lastHTML = html;
         lastMeta = Object.assign({}, meta0);
         lastMeta.kindLabel = lastMeta.kindLabel || "应用";
+        renderArtifact(thinkEl, {
+          label: "生成结果",
+          rows: [
+            ["使用模型", (loadSettings().model || "-")],
+            ["输出规模", html.length + " 字符 · " + html.split("\n").length + " 行"],
+            ["耗时", ((Date.now() - t0) / 1000).toFixed(1) + "s"],
+            ["响应式", /@media/i.test(html) ? "含媒体查询" : "未检测到"]
+          ]
+        });
         runNarrate(lastMeta, isRefine, true);
         currentAbort = null;
         return;
@@ -177,19 +450,25 @@
       const el = addAgent(s.title, s.icon);
       await sleep(460 + Math.random() * 300);
       setAgent(el, s.html, true);
+      if (s.artifact) renderArtifact(el, s.artifact);
     }
     setCode(lastHTML);
     stageTitle.textContent = meta.name || "应用";
     appKind.textContent = (meta.kindLabel || "应用") + (cloud ? " · 云端模型" : " · " + meta.paletteName);
     addMsg("bot", `好嘞，「<b>${meta.name || "应用"}</b>」${cloud ? "由云端大模型生成" : "第一版"}出来了，右边可以直接体验 👀。第一个成果只是起点——你先检查它有没有达到想要的效果，再用具体的意见告诉我改哪里。`);
 
+    // 说明这次具体改了什么（让迭代看得见）
+    if (meta.tweaks && meta.tweaks.length) {
+      addMsg("bot", "这次具体动了这些地方：<br>· " + meta.tweaks.map(escapeHTML).join("<br>· "));
+    }
+
     // 具体的改进建议（Atoms 式迭代引导）
     const sugg = [
       "让营业时间更醒目好找",
-      "手机上点击菜单按钮没反应",
       "配色再暖一点",
       "首屏文案再短一些",
-      "加上联系方式和地址地图"
+      "加上联系方式和地址",
+      "去掉所有动效"
     ];
     const el = addMsg("bot", "可以这样提改进意见 👇");
     const box = document.createElement("div");
@@ -288,6 +567,7 @@
         html: lastHTML, title: stageTitle.textContent, v: curVer, t: Date.now()
       }));
     } catch (e) {}
+    scheduleSync();
   }
   function restoreLast() {
     try {
@@ -346,6 +626,7 @@
     brief.goal = $("#bGoal").value.trim();
     brief.pref = $("#bPref").value.trim();
     try { localStorage.setItem(BRIEF_KEY, JSON.stringify(brief)); } catch (e) {}
+    scheduleSync();
     const filled = !!(brief.audience || brief.goal || brief.pref || brief.files.length);
     markOnboard("brief", filled);
     renderBrief();
@@ -428,7 +709,10 @@
     const resp = await fetch("/api/llm", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ baseUrl: s.baseUrl, apiKey: s.apiKey, model: s.model, messages, stream: true }),
+      body: JSON.stringify({
+      baseUrl: s.baseUrl, apiKey: s.apiKey, model: s.model, messages, stream: true,
+      temperature: s.temperature != null ? Number(s.temperature) : 0.7
+    }),
       signal
     });
     if (!resp.ok) { const t = await resp.text(); throw new Error("HTTP " + resp.status + " " + t); }
@@ -474,18 +758,23 @@
     $("#apiKey").value = s.apiKey || "";
     $("#modelName").value = s.model || PROVIDERS[s.provider || "mimo"].model;
     $("#baseUrl").value = s.baseUrl || PROVIDERS[s.provider || "mimo"].base;
+    const tp = s.temperature != null ? s.temperature : 0.7;
+    $("#temperature").value = tp;
+    $("#tempVal").textContent = tp;
     $("#modelMsg").textContent = "";
     applyProv();
     modelModal.hidden = false;
   });
   $("#modelClose").addEventListener("click", () => { modelModal.hidden = true; refreshStatus(); });
   $("#prov").addEventListener("change", applyProv);
+  $("#temperature").addEventListener("input", (e) => { $("#tempVal").textContent = e.target.value; });
   $("#saveModel").addEventListener("click", () => {
     const s = {
       provider: $("#prov").value,
       apiKey: $("#apiKey").value.trim(),
       model: $("#modelName").value.trim(),
-      baseUrl: $("#baseUrl").value.trim()
+      baseUrl: $("#baseUrl").value.trim(),
+      temperature: Number($("#temperature").value)
     };
     if (!s.apiKey || !s.baseUrl) { $("#modelMsg").textContent = "请填写 API Key 与 Base URL"; return; }
     saveSettings(s);
@@ -537,35 +826,153 @@
       el.textContent = "v" + curVer + " · 未发布";
     }
   }
+  /* ---------- 行级 diff（LCS，限制规模避免卡顿） ---------- */
+  function diffLines(a, b) {
+    const A = String(a || "").split("\n"), B = String(b || "").split("\n");
+    const MAXL = 800;
+    const ta = A.length > MAXL ? A.slice(0, MAXL) : A;
+    const tb = B.length > MAXL ? B.slice(0, MAXL) : B;
+    const n = ta.length, m = tb.length;
+    if (n === 0 && m === 0) return [];
+    const w = m + 1;
+    const dp = new Int32Array((n + 1) * w);
+    for (let i = n - 1; i >= 0; i--) {
+      for (let j = m - 1; j >= 0; j--) {
+        dp[i * w + j] = ta[i] === tb[j]
+          ? dp[(i + 1) * w + j + 1] + 1
+          : Math.max(dp[(i + 1) * w + j], dp[i * w + j + 1]);
+      }
+    }
+    const out = [];
+    let i = 0, j = 0;
+    while (i < n && j < m) {
+      if (ta[i] === tb[j]) { out.push({ t: "eq", s: ta[i] }); i++; j++; }
+      else if (dp[(i + 1) * w + j] >= dp[i * w + j + 1]) { out.push({ t: "del", s: ta[i] }); i++; }
+      else { out.push({ t: "add", s: tb[j] }); j++; }
+    }
+    while (i < n) { out.push({ t: "del", s: ta[i] }); i++; }
+    while (j < m) { out.push({ t: "add", s: tb[j] }); j++; }
+    return out;
+  }
+  function renderDiff(aHtml, bHtml, metaText) {
+    const rows = diffLines(aHtml || "", bHtml || "");
+    let add = 0, del = 0, html = "";
+    rows.forEach((r) => {
+      const s = escapeHTML(r.s === undefined ? "" : String(r.s));
+      if (r.t === "add") { add++; html += '<div class="dl add">+ ' + (s || "&nbsp;") + "</div>"; }
+      else if (r.t === "del") { del++; html += '<div class="dl del">- ' + (s || "&nbsp;") + "</div>"; }
+      else html += '<div class="dl eq">  ' + (s || "&nbsp;") + "</div>";
+    });
+    $("#diffOut").innerHTML = html || '<div class="dl eq">两个版本内容相同</div>';
+    $("#diffMeta").textContent = (metaText || "") + " 新增 " + add + " 行 · 删除 " + del + " 行";
+  }
+
+  function openDiff(baseV, targetV) {
+    const base = versions.find((x) => x.v === baseV);
+    const target = versions.find((x) => x.v === targetV);
+    if (!base || !target) { toast("找不到要对比的版本"); return; }
+    codePanel.classList.add("open");
+    setCodeMode("diff");
+    renderDiff(base.html, target.html, "v" + base.v + " → v" + target.v + "：");
+    $("#diffBase").innerHTML = versions.map((x) =>
+      '<option value="' + x.v + '"' + (x.v === baseV ? " selected" : "") + ">v" + x.v + " · " + escapeHTML(x.name || "") + "</option>"
+    ).join("");
+    diffTarget = targetV;
+  }
+  let diffTarget = 0;
+
   function renderHistory() {
     const list = $("#verList");
     list.innerHTML = "";
+    if (!versions.length) {
+      list.innerHTML = '<div class="ver-empty">还没有版本。先发起一个需求，生成后这里就会出现 v1。</div>';
+      return;
+    }
     versions.slice().reverse().forEach((it) => {
       const d = document.createElement("div");
       d.className = "ver-item" + (it.v === curVer ? " cur" : "");
       const t = new Date(it.ts);
       const time = String(t.getHours()).padStart(2, "0") + ":" + String(t.getMinutes()).padStart(2, "0");
+      const size = Math.max(1, Math.round((it.html || "").length / 1024)) + "KB";
       d.innerHTML =
-        '<span class="vno">v' + it.v + "</span>" +
-        '<span class="vmeta"><b>' + escapeHTML(it.name) + "</b>" +
-        escapeHTML(it.note ? it.note.slice(0, 40) : "首个成果") + " · " + time + "</span>" +
-        (published && published.v === it.v ? '<span class="vpill live">线上</span>' : '<span class="vpill">草稿</span>');
-      d.addEventListener("click", () => {
-        lastHTML = it.html;
-        curVer = it.v;
-        preview.srcdoc = withNavGuard(it.html);
-        setCode(it.html);
-        stageTitle.textContent = it.name;
-        updateVerBadge();
-        persistLast();
-        $("#histModal").hidden = true;
-        toast("已回到 v" + it.v + "，可继续修改或重新发布");
+        '<div class="ver-main">' +
+          '<span class="vno">v' + it.v + "</span>" +
+          '<div class="vmeta"><b>' + escapeHTML(it.name || "应用") + "</b>" +
+            "<span>" + escapeHTML(it.note ? it.note.slice(0, 40) : "首个成果") + " · " + time + " · " + size + "</span></div>" +
+          (published && published.v === it.v ? '<span class="vpill live">线上</span>' : '<span class="vpill">草稿</span>') +
+        "</div>" +
+        '<div class="ver-ops">' +
+          '<button data-op="restore">回到这版</button>' +
+          '<button data-op="rename">改名</button>' +
+          '<button data-op="diff">对比</button>' +
+        "</div>";
+      d.addEventListener("click", (e) => {
+        const btn = e.target.closest("button[data-op]");
+        if (btn) {
+          const op = btn.dataset.op;
+          if (op === "restore") {
+            lastHTML = it.html;
+            curVer = it.v;
+            preview.srcdoc = withNavGuard(it.html);
+            setCode(it.html);
+            stageTitle.textContent = it.name;
+            updateVerBadge();
+            persistLast();
+            $("#histModal").hidden = true;
+            toast("已回到 v" + it.v + "，可继续修改或重新发布");
+          } else if (op === "rename") {
+            const nm = prompt("给 v" + it.v + " 起个名字", it.name || "");
+            if (nm !== null && nm.trim()) { it.name = nm.trim(); renderHistory(); persistLast(); }
+          } else if (op === "diff") {
+            const baseV = it.v === curVer ? Math.max(1, it.v - 1) : curVer;
+            $("#histModal").hidden = true;
+            openDiff(baseV, it.v);
+          }
+          return;
+        }
       });
       list.appendChild(d);
     });
   }
   $("#histBtn").addEventListener("click", () => { renderHistory(); $("#histModal").hidden = false; });
   $("#histClose").addEventListener("click", () => { $("#histModal").hidden = true; });
+  $("#diffBase").addEventListener("change", (e) => {
+    const baseV = Number(e.target.value);
+    openDiff(baseV, diffTarget || curVer);
+  });
+
+  /* ---------- 代码面板：查看 / 编辑 / 对比 ---------- */
+  let codeMode = "view";
+  function setCodeMode(mode) {
+    codeMode = mode;
+    document.querySelectorAll(".code-tabs .ct").forEach((b) => b.classList.toggle("active", b.dataset.mode === mode));
+    $("#codeViewWrap").hidden = mode !== "view";
+    $("#codeEditor").hidden = mode !== "edit";
+    $("#diffBody").hidden = mode !== "diff";
+    $("#applyEdit").hidden = mode !== "edit";
+    if (mode === "edit") $("#codeEditor").value = lastHTML;
+    if (mode === "diff" && versions.length >= 2) {
+      const baseV = Math.max(1, curVer - 1);
+      renderDiff((versions.find((x) => x.v === baseV) || {}).html || "", lastHTML, "v" + baseV + " → 当前：");
+      $("#diffBase").innerHTML = versions.map((x) =>
+        '<option value="' + x.v + '"' + (x.v === baseV ? " selected" : "") + ">v" + x.v + " · " + escapeHTML(x.name || "") + "</option>"
+      ).join("");
+      diffTarget = curVer;
+    }
+  }
+  document.querySelectorAll(".code-tabs .ct").forEach((b) =>
+    b.addEventListener("click", () => setCodeMode(b.dataset.mode))
+  );
+  $("#applyEdit").addEventListener("click", () => {
+    const v = $("#codeEditor").value;
+    if (!v.trim()) { toast("代码是空的"); return; }
+    lastHTML = v;
+    preview.srcdoc = withNavGuard(lastHTML);
+    setCode(lastHTML);
+    pushVersion(lastHTML, stageTitle.textContent || "应用", "手动编辑代码");
+    persistLast();
+    toast("已应用，并保存为 v" + curVer);
+  });
 
   /* ---------- 在新窗口预览（供他人查看并试用） ---------- */
   $("#shareBtn").addEventListener("click", () => {
@@ -645,30 +1052,41 @@
     toast("已导出 HTML 文件");
   });
 
-  /* ---------- publish (demo: localStorage snapshot → live address) ---------- */
-  publishBtn.addEventListener("click", () => {
+  /* ---------- publish: 真实可访问地址（登录后走服务端存储） ---------- */
+  publishBtn.addEventListener("click", async () => {
     if (!lastHTML) return;
-    let note = "首次发布", title = "🚀 已发布";
-    if (!published) {
-      const id = Math.random().toString(36).slice(2, 8);
-      published = { v: curVer, url: "https://forge.app/p/" + id };
-    } else if (published.v !== curVer) {
-      note = "已从 v" + published.v + " 更新到 v" + curVer;
-      title = "🔄 线上版本已更新";
-      published = { v: curVer, url: published.url };
+    const prevV = published ? published.v : 0;
+    let note = "首次发布", title = "已发布";
+    if (prevV && prevV !== curVer) { note = "已从 v" + prevV + " 更新到 v" + curVer; title = "线上版本已更新"; }
+    else if (prevV === curVer) { note = "当前已是最新版本"; title = "已是最新"; }
+
+    if (me) {
+      publishBtn.disabled = true;
+      const r = await api("/api/publish", {
+        method: "POST",
+        body: { html: lastHTML, name: stageTitle.textContent, version: curVer }
+      });
+      publishBtn.disabled = false;
+      if (!r.ok) { toast("发布失败：" + ((r.data && r.data.error) || "未知错误")); return; }
+      const info = r.data.published;
+      published = { v: info.version, url: info.url, slug: info.slug, name: info.name, ts: info.ts };
+      $("#pubDesc").textContent = "这个地址真实可访问，任何人打开链接都能查看并试用你的应用。";
     } else {
-      note = "当前已是最新版本";
-      title = "✅ 已是最新";
+      if (!published || published.url.indexOf("http") !== 0) {
+        published = { v: curVer, url: "游客模式 · 本地快照 " + Math.random().toString(36).slice(2, 6), local: true };
+      } else {
+        published = { v: curVer, url: published.url, local: true };
+      }
+      $("#pubDesc").textContent = "游客模式发布的是本地快照，换个浏览器就打不开。登录后发布生成的网址任何人都能访问。";
     }
     try { localStorage.setItem("forge:live", JSON.stringify(published)); } catch (e) {}
-    try { localStorage.setItem("forge:live:html", lastHTML); } catch (e) {}
     $("#pubTitle").textContent = title;
     $("#pubVer").textContent = "v" + published.v;
     $("#pubNote").textContent = note;
-    $("#pubDesc").textContent = "把这个地址分享给别人，他们就能直接查看并试用你的应用（Demo 环境保存在本地）。";
     $("#liveUrl").value = published.url;
     $("#publishModal").hidden = false;
     updateVerBadge();
+    persistLast();
     toast(note === "当前已是最新版本" ? "线上已是最新版本" : "已发布 v" + published.v);
   });
   $("#copyUrl").addEventListener("click", () => {
@@ -678,14 +1096,17 @@
     toast("链接已复制");
   });
   $("#openUrl").addEventListener("click", () => {
+    if (published && published.url && published.url.indexOf("http") === 0) {
+      window.open(published.url, "_blank");
+      return;
+    }
     const w = window.open();
     if (w) w.document.write(lastHTML);
   });
   $("#modalClose").addEventListener("click", () => { $("#publishModal").hidden = true; });
 
-  /* ---------- welcome ---------- */
+  /* ---------- welcome / boot ---------- */
   refreshStatus();
-  // 恢复线上发布状态
   try {
     const raw = localStorage.getItem("forge:live");
     if (raw) published = JSON.parse(raw);
@@ -694,11 +1115,37 @@
   updateVerBadge();
   renderOnboard();
 
-  /* 会话持久化：重开浏览器自动恢复上次的成果，可直接继续迭代或发布 */
-  if (restoreLast()) {
-    addMsg("bot", "📂 已恢复你上次的项目（数据存在本地，关掉浏览器再回来依然在）。可以直接继续改，或者 <b>🌐 发布</b> / 打开 <b>🕘 版本</b> 回看历史。");
+  function welcome() {
+    addMsg("bot", "嗨，我是 Forge 的搭子 👋 你不用写代码，用大白话告诉我「想要什么结果」就行——比如「帮我做个社区咖啡馆官网，暖色，要有菜单、营业时间、地址和一段介绍」。<b>先定一个主要目标</b>，我先给你搭出第一版，你看着不对再用具体的意见喊我改。");
+    addMsg("bot", "几个小提示：<br>· 上面的 <b>项目简报</b> 可以写明<b>为谁设计、要帮他们实现什么、有哪些偏好</b>，还能<b>上传截图或设计稿</b>当参考；<br>· 右侧可实时预览，<b>代码</b> 面板能直接改代码或对比版本差异；<br>· <b>发布</b> 会给它一个真实可访问的网址，之后再改可以一键<b>更新线上版本</b>，<b>版本</b> 里能随时回滚。");
   }
 
-  addMsg("bot", "嗨，我是 Forge 的搭子 👋 你不用写代码，用大白话告诉我「想要什么结果」就行——比如「帮我做个社区咖啡馆官网，暖色，要有菜单、营业时间、地址和一段介绍」。<b>先定一个主要目标</b>，我先给你搭出第一版，你看着不对再用具体的意见喊我改。");
-  addMsg("bot", "几个小提示：<br>· 上面 <b>📋 项目简报</b> 可以写明<b>为谁设计、要帮他们实现什么、有哪些偏好</b>，还能<b>上传截图或设计稿</b>当参考；<br>· 右侧可实时预览，<b>↗ 预览</b> 能在新窗口打开给别人试用；<br>· <b>🌐 发布</b> 会给它一个可分享的网址，之后再改可以一键<b>更新线上版本</b>，<b>🕘 版本</b> 里能随时回滚。");
+  (async function boot() {
+    const hasServer = await checkAuth();
+    if (hasServer && me) {
+      enterApp();
+      const restored = await pullState();
+      if (restored) {
+        addMsg("bot", "已从服务端恢复你上次的项目（登录状态下项目、版本和发布记录都存云端）。可以直接继续改，或者发布 / 打开版本历史。");
+      } else if (restoreLast()) {
+        addMsg("bot", "已恢复你上次的项目（本地记录）。可以直接继续改，或者发布 / 打开版本历史。");
+      }
+      welcome();
+      return;
+    }
+    if (hasServer) {
+      // 服务可用但未登录：先走登录页
+      $("#authGate").classList.remove("gone");
+      $("#appShell").hidden = true;
+      renderAcct();
+      welcome();
+      return;
+    }
+    // 纯静态打开（没有本地服务）：游客模式
+    enterGuest();
+    if (restoreLast()) {
+      addMsg("bot", "已恢复你上次的项目（数据存在本地，关掉浏览器再回来依然在）。");
+    }
+    welcome();
+  })();
 })();

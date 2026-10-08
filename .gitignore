@@ -2,3 +2,6 @@ node_modules/
 .playwright-cli/
 *.log
 .DS_Store
+
+# 运行时数据：用户账号、会话、状态与发布页面（含真实用户数据，不入库）
+data/

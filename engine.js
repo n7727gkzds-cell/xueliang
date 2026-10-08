@@ -343,6 +343,56 @@ footer{text-align:center;padding:40px 0;color:var(--sub);font-size:13px;border-t
     return { html, meta };
   }
 
+  /* 让"改一下"真的看得出变化：对生成的 HTML 做可见的微调 */
+  function applyTweaks(html, instruction) {
+    const t = instruction;
+    let out = html;
+    const notes = [];
+    const HL = {
+      "营业时间": "visit", "地址": "visit", "位置": "visit", "到店": "visit",
+      "菜单": "menu", "价格": "price", "定价": "price",
+      "报名": "reg", "日程": "agenda", "嘉宾": "speaker",
+      "项目": "work", "技能": "skill", "关于": "about",
+      "功能": "feat", "常见问题": "faq", "商品": "goods", "文章": "posts"
+    };
+    if (/(醒目|突出|强调|明显|显眼|更好找|更清楚|更显眼)/.test(t)) {
+      const hit = Object.keys(HL).find((k) => t.indexOf(k) >= 0);
+      const id = hit ? HL[hit] : null;
+      const hl = 'style="background:linear-gradient(180deg,rgba(124,92,255,.12),transparent);border-top:2px solid var(--p);border-bottom:2px solid var(--p)"';
+      if (id && out.indexOf('id="' + id + '"') >= 0) {
+        out = out.replace(new RegExp('<section([^>]*)id="' + id + '"'), '<section$1 ' + hl + ' id="' + id + '"');
+        notes.push("把「" + hit + "」区块加了高亮边框和底色，更好找");
+      } else {
+        out = out.replace("</head>", "<style>h1{text-shadow:0 6px 30px rgba(124,92,255,.35)}</style></head>");
+        notes.push("强化了首屏标题的视觉重量");
+      }
+    }
+    if (/(短一点|更短|精简|简洁|少一点字|文案再短)/.test(t)) {
+      out = out.replace(/(<p class="lead"[^>]*>)([\s\S]*?)(<\/p>)/g, (m, a, b, c) => {
+        const s = b.replace(/<[^>]+>/g, "");
+        return a + (s.length > 34 ? s.slice(0, 33) + "…" : s) + c;
+      });
+      notes.push("首屏和各段的长文案精简了");
+    }
+    if (/(不要动效|去掉动效|别加动画|去掉动画|静止)/.test(t)) {
+      out = out.replace("</head>", "<style>*{animation:none!important;transition:none!important}</style></head>");
+      notes.push("关掉了全部动效与过渡");
+    }
+    if (/(字更大|字号大|放大字体|大一点字)/.test(t)) {
+      out = out.replace("</head>", "<style>body{font-size:17px}</style></head>");
+      notes.push("整体字号调大了一档");
+    }
+    if (/(圆角更大|更圆)/.test(t)) {
+      out = out.replace("</head>", "<style>.card,.btn,.pill{border-radius:20px}</style></head>");
+      notes.push("卡片和按钮圆角加大");
+    }
+    if (/(留白|间距更大|别太挤|宽松)/.test(t)) {
+      out = out.replace("</head>", "<style>.section{padding-top:80px!important;padding-bottom:80px!important}</style></head>");
+      notes.push("区块上下留白加大");
+    }
+    return { html: out, notes };
+  }
+
   /* apply a natural-language refinement to existing meta */
   function refine(prevMeta, instruction) {
     const t = instruction.toLowerCase();
@@ -358,7 +408,10 @@ footer{text-align:center;padding:40px 0;color:var(--sub);font-size:13px;border-t
     if (/(营业时间|hours|地址|位置|location)/.test(t)) next.sections = [...new Set([...next.sections, "hours", "location"])];
     if (/(联系|contact)/.test(t)) next.sections = [...new Set([...next.sections, "contact"])];
     const build = builders[next.type] || builders.landing;
-    const html = build(next);
+    let html = build(next);
+    const tweak = applyTweaks(html, instruction);
+    html = tweak.html;
+    next.tweaks = tweak.notes;
     next.kindLabel = TYPE_LABEL[next.type];
     next.paletteName = PALETTES[next.palette].name;
     next.sectionCount = (html.match(/class="card"/g) || []).length;

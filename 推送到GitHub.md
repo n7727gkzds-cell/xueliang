@@ -51,7 +51,7 @@ git push -u origin main
    - `笔试文档-ROOT全栈岗位笔试.md`
    - `笔试文档-ROOT全栈岗位笔试.html`
    - 根目录 `README.md` / `提交说明.html` 也已同步
-3. 在线链接（已部署）：https://2108109949544263680.app.workbuddy.host/
+3. 在线链接（已部署）：https://forge-ai-app-studio.app.workbuddy.host/
 
 ## 常见问题
 
