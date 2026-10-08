@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Ctext y='14' font-size='14'%3E%E2%9A%9B%3C/text%3E%3C/svg%3E" />
+<title>Forge · AI App Studio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body data-theme="dark">
+
+<!-- ============ App Shell ============ -->
+<div class="app">
+
+  <!-- Sidebar: conversation + agents -->
+  <aside class="rail">
+    <div class="brand">
+      <div class="brand-mark">⚛</div>
+      <div class="brand-text">
+        <strong>Forge</strong>
+        <span>AI App Studio</span>
+      </div>
+      <button class="icon-btn" id="newChat" title="新会话">＋</button>
+    </div>
+
+    <!-- ===== 初始化引导：初始化 / 接入模型（注册）/ 核心主流程 ===== -->
+    <div class="onboard" id="onboard">
+      <div class="ob-head">
+        <span class="ob-l">🚀 初始化 · 三步开工</span>
+        <span class="ob-p" id="obProg">0/3</span>
+      </div>
+      <ul class="ob-list">
+        <li id="ob1"><i></i><span>填写项目简报（为谁做 / 达成什么 / 偏好）</span></li>
+        <li id="ob2"><i></i><span>接入模型（右上角 ⚙ 模型，保存 API Key）</span></li>
+        <li id="ob3"><i></i><span>发起第一个需求，走通核心主流程</span></li>
+      </ul>
+    </div>
+
+    <!-- ===== 项目简报：说明为谁设计、目标、偏好，并可附参考资料 ===== -->
+    <div class="brief" id="brief">
+      <button class="brief-head" id="briefToggle" title="展开项目简报">
+        <span class="bh-l">📋 项目简报</span>
+        <span class="bh-s" id="briefSum">说明为谁做、要达成什么、有哪些偏好</span>
+        <span class="bh-c">▾</span>
+      </button>
+      <div class="brief-body" id="briefBody" hidden>
+        <label class="bl">为谁设计</label>
+        <input id="bAudience" class="binp" placeholder="例如：周边居民与上班族" />
+        <label class="bl">帮他们实现什么</label>
+        <input id="bGoal" class="binp" placeholder="例如：快速查到菜单和营业时间" />
+        <label class="bl">偏好与约束</label>
+        <input id="bPref" class="binp" placeholder="例如：暖色、手机上要好读、不要动效" />
+        <label class="bl">参考资料（截图 / 设计稿 / 文件）</label>
+        <div class="attach-row">
+          <button class="abtn" id="attachBtn">＋ 添加附件</button>
+          <input type="file" id="attachInput" multiple hidden accept="image/*,.pdf,.txt,.md,.html,.csv" />
+          <span class="atag" id="attachCount">未添加</span>
+        </div>
+        <div class="attach-list" id="attachList"></div>
+        <div class="brief-actions">
+          <button class="btok" id="briefSave">保存简报</button>
+          <span class="bthint">每次生成都会一并交给智能体</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="rail-scroll" id="thread">
+      <!-- welcome / messages injected here -->
+    </div>
+
+    <div class="composer">
+      <div class="chips" id="chips">
+        <button class="chip" data-q="帮我做一个社区咖啡馆官网，包含菜单、营业时间、地址和一段品牌故事，用暖色，手机上要好看。">☕ 社区咖啡馆</button>
+        <button class="chip" data-q="做一个个人作品集主页，深色高级感，展示我的项目和技能。">🎨 个人作品集</button>
+        <button class="chip" data-q="做一个 SaaS 产品落地页，科技蓝，含功能、定价和常见问题。">🚀 产品落地页</button>
+        <button class="chip" data-q="做一个运营数据看板，含核心指标、趋势图和近期动态。">📊 数据看板</button>
+      </div>
+      <div class="input-row">
+        <textarea id="prompt" rows="1" placeholder="用一句话描述你想做的应用…"></textarea>
+        <button class="send-btn" id="send">生成</button>
+      </div>
+      <div class="hint">Enter 发送 · Shift+Enter 换行 · 生成后可继续用自然语言提修改</div>
+    </div>
+  </aside>
+
+  <!-- Main: preview canvas -->
+  <main class="stage">
+    <header class="topbar">
+      <div class="topbar-left">
+        <span class="dot live"></span>
+        <span id="stageTitle">实时预览</span>
+        <span class="badge" id="appKind">—</span>
+      </div>
+      <div class="topbar-right">
+        <span class="ver-badge" id="verBadge" title="当前版本">草稿</span>
+        <button class="ghost-btn" id="histBtn" title="版本历史与回滚">🕘 版本</button>
+        <button class="ghost-btn" id="shareBtn" title="在新窗口打开，让他人查看并试用">↗ 预览</button>
+        <span class="pill-status" id="modelStatus" title="当前模型引擎">⚙ 本地引擎</span>
+        <button class="ghost-btn" id="modelBtn" title="模型设置">⚙ 模型</button>
+        <div class="seg" id="deviceSeg">
+          <button data-dev="desktop" class="active" title="桌面">🖥</button>
+          <button data-dev="tablet" title="平板">▭</button>
+          <button data-dev="phone" title="手机">▯</button>
+        </div>
+        <button class="ghost-btn" id="codeToggle" title="查看代码">{"<>"} 代码</button>
+        <button class="ghost-btn" id="themeToggle" title="切换主题">◐</button>
+        <button class="primary-btn" id="publish" disabled>🌐 发布</button>
+        <button class="ghost-btn" id="export" disabled title="导出 HTML">⬇ 导出</button>
+      </div>
+    </header>
+
+    <section class="canvas-wrap">
+      <div class="device-frame" id="frame" data-dev="desktop">
+        <iframe id="preview" title="preview" sandbox="allow-scripts allow-same-origin allow-forms"></iframe>
+      </div>
+
+      <!-- Empty state -->
+      <div class="empty" id="empty">
+        <div class="empty-glow"></div>
+        <div class="empty-inner">
+          <h1>把想法变成能用的应用</h1>
+          <p>用日常语言描述你想要的结果。<b>先确定一个主要目标</b>，拿到第一个小成果，再用具体的意见一步步改好。右侧可实时预览、随时发布成可分享的网址。</p>
+        <div class="empty-examples">
+          <button class="ex-card" data-q="帮我做一个社区咖啡馆官网，包含菜单、营业时间、地址和一段品牌故事，用暖色，手机上要好看。">
+            <span class="ex-ic">☕</span><strong>社区咖啡馆</strong>
+            <span class="ex-d">暖色官网 · 菜单 / 营业时间 / 地址 / 品牌故事</span>
+          </button>
+          <button class="ex-card" data-q="做一个个人作品集主页，深色高级感，展示我的项目和技能。">
+            <span class="ex-ic">🎨</span><strong>个人作品集</strong>
+            <span class="ex-d">暗色高级感 · 精选项目 / 技能栈 / 关于</span>
+          </button>
+          <button class="ex-card" data-q="做一个 SaaS 产品落地页，科技蓝，含功能、定价和常见问题。">
+            <span class="ex-ic">🚀</span><strong>产品落地页</strong>
+            <span class="ex-d">科技蓝 · 功能 / 定价 / 证言 / 常见问题</span>
+          </button>
+          <button class="ex-card" data-q="做一个运营数据看板，含核心指标、趋势图和近期动态。">
+            <span class="ex-ic">📊</span><strong>数据看板</strong>
+            <span class="ex-d">核心指标 / 趋势图 / 近期变更动态</span>
+          </button>
+        </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Code panel (slide-over drawer, stage level: 不参与 canvas 滚动区) -->
+    <div class="code-panel" id="codePanel">
+      <div class="code-head">
+        <span>generated · index.html</span>
+        <button class="ghost-btn" id="codeClose">收起 ✕</button>
+      </div>
+      <pre class="code-body"><code id="codeView"></code></pre>
+    </div>
+  </main>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<!-- Publish modal -->
+<div class="modal" id="publishModal" hidden>
+  <div class="modal-card">
+    <h3 id="pubTitle">🚀 已发布</h3>
+    <p id="pubDesc">你的应用已生成线上地址，可分享给他人访问（Demo 环境保存在本地）。</p>
+    <div class="pub-ver">线上版本 <b id="pubVer">v1</b> · <span id="pubNote">首次发布</span></div>
+    <div class="link-row">
+      <input id="liveUrl" readonly />
+      <button class="primary-btn" id="copyUrl">复制</button>
+      <button class="ghost-btn" id="openUrl">打开</button>
+    </div>
+    <div class="pub-tip">之后每次改动都可以再点「发布」把线上版本更新到最新版，也可在版本历史里回滚。</div>
+    <button class="modal-close" id="modalClose">完成</button>
+  </div>
+</div>
+
+<!-- Version history modal -->
+<div class="modal" id="histModal" hidden>
+  <div class="modal-card" style="width:min(430px,92vw)">
+    <h3>🕘 版本历史</h3>
+    <p>每一次生成或修改都会留下一个版本，可随时回到任意一版。</p>
+    <div class="ver-list" id="verList"></div>
+    <button class="modal-close" id="histClose">关闭</button>
+  </div>
+</div>
+
+<!-- Model settings modal -->
+<div class="modal" id="modelModal" hidden>
+  <div class="modal-card" style="width:min(470px,92vw)">
+    <h3>⚙ 模型设置</h3>
+    <p>接入真实大模型（OpenAI 兼容协议）。密钥只存在你本地浏览器，经本地代理转发，不会暴露给前端。</p>
+    <label class="fld">服务商</label>
+    <select id="prov" class="inp">
+      <option value="mimo">小米 MiMo</option>
+      <option value="deepseek">DeepSeek</option>
+      <option value="openai">OpenAI</option>
+      <option value="qwen">通义千问 Qwen</option>
+      <option value="glm">智谱 GLM</option>
+      <option value="kimi">Kimi (Moonshot)</option>
+      <option value="custom">自定义</option>
+    </select>
+    <label class="fld">API Key</label>
+    <input id="apiKey" class="inp" type="password" placeholder="sk-..." />
+    <label class="fld">模型名 <span class="tag" id="modelHint"></span></label>
+    <input id="modelName" class="inp" placeholder="deepseek-chat" />
+    <label class="fld">Base URL</label>
+    <input id="baseUrl" class="inp" placeholder="https://api.deepseek.com/v1" />
+    <div class="modal-actions">
+      <button class="primary-btn" id="saveModel">保存</button>
+      <button class="ghost-btn" id="testModel">测试连接</button>
+      <button class="ghost-btn" id="modelClose">关闭</button>
+    </div>
+    <p id="modelMsg" class="tag" style="margin-top:12px"></p>
+  </div>
+</div>
+
+<script src="engine.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
