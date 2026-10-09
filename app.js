@@ -211,6 +211,25 @@
   $("#authPw").addEventListener("keydown", (e) => { if (e.key === "Enter") $("#authSubmit").click(); });
 
   /* ---------- UI helpers ---------- */
+  /* 移动端（≤620px）对话/预览全屏切换；桌面端该控件隐藏，调用无副作用 */
+  function setMobileView(v) {
+    if (!window.matchMedia("(max-width:620px)").matches) return;
+    document.body.dataset.mview = v;
+    const seg = $("#mobileViewSeg");
+    if (seg) seg.querySelectorAll("button").forEach((b) => b.classList.toggle("active", b.dataset.v === v));
+  }
+  (function initMobileView() {
+    const seg = $("#mobileViewSeg");
+    if (!seg) return;
+    seg.addEventListener("click", (e) => {
+      const b = e.target.closest("button[data-v]");
+      if (b) setMobileView(b.dataset.v);
+    });
+    // 断点变化时清掉视图状态，避免从手机切回桌面后布局残留
+    window.matchMedia("(max-width:620px)").addEventListener("change", (e) => {
+      if (!e.matches) { delete document.body.dataset.mview; }
+    });
+  })();
   function toast(msg) {
     const t = $("#toast");
     t.textContent = msg; t.classList.add("show");
@@ -455,6 +474,7 @@
     setCode(lastHTML);
     stageTitle.textContent = meta.name || "应用";
     appKind.textContent = (meta.kindLabel || "应用") + (cloud ? " · 云端模型" : " · " + meta.paletteName);
+    setMobileView("preview"); // 手机端生成完成后自动切到预览视图
     addMsg("bot", `好嘞，「<b>${meta.name || "应用"}</b>」${cloud ? "由云端大模型生成" : "第一版"}出来了，右边可以直接体验 👀。第一个成果只是起点——你先检查它有没有达到想要的效果，再用具体的意见告诉我改哪里。`);
 
     // 说明这次具体改了什么（让迭代看得见）

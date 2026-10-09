@@ -337,11 +337,6 @@ select.inp{cursor:pointer}
 @keyframes pulse{0%,100%{box-shadow:0 0 0 4px rgba(54,211,153,.18)}50%{box-shadow:0 0 0 7px rgba(54,211,153,.05)}}
 @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-18px)}}
 
-@media (max-width:880px){
-  .app{grid-template-columns:1fr;grid-template-rows:42vh 1fr}
-  .rail{border-right:none;border-bottom:1px solid var(--line)}
-  .code-panel{width:100%;max-width:none}
-}
 
 /* ============================================================
    v2 —— 登录注册 / 账号 / 代码编辑与对比 / 智能体产出物
@@ -515,10 +510,78 @@ body[data-theme="light"]{--panel-3:#eaeef8}
 .ver-empty{padding:22px;text-align:center;font-size:12.5px;color:var(--txt-faint)}
 .modal-card.wide{width:min(560px,92vw)}
 .rng{width:100%;accent-color:var(--accent);margin-top:4px}
+/* ============================================================
+   响应式适配 —— 三档断点
+   ≤1080 窄窗口/平板横屏：侧栏收窄、隐藏次要信息
+   ≤880  平板竖屏：上下分栏（对话在上、预览在下），代码面板全屏
+   ≤620  手机：对话/预览全屏切换（顶栏内切换），示例卡单列
+   ============================================================ */
+/* 移动端对话/预览切换条（≤620px 显示，fixed 不随视图隐藏） */
+.mv-bar{
+  display:none;position:fixed;bottom:14px;left:50%;transform:translateX(-50%);z-index:25;
+  background:var(--panel);border:1px solid var(--line-2);border-radius:999px;padding:4px;
+  box-shadow:var(--shadow);
+}
+.mv-bar button{
+  border:none;background:none;color:var(--txt-dim);font-size:12.5px;padding:8px 16px;
+  border-radius:999px;cursor:pointer;font-family:var(--sans);white-space:nowrap;
+}
+.mv-bar button.active{background:var(--grad);color:#fff;font-weight:600}
+
+@media (max-width:1080px){
+  .app{grid-template-columns:320px 1fr}
+  .pill-status{display:none}
+  .topbar{padding:0 12px}
+  .topbar-right{gap:6px}
+  .canvas-wrap{padding:18px}
+}
 
 @media (max-width:880px){
+  .app{grid-template-columns:1fr;grid-template-rows:minmax(0,42vh) minmax(0,1fr)}
+  .rail{border-right:none;border-bottom:1px solid var(--line)}
+  .topbar{height:auto;min-height:50px;flex-wrap:wrap;padding:6px 12px;row-gap:6px}
+  .topbar-right{flex-wrap:wrap;row-gap:6px}
+  #deviceSeg{display:none} /* 预览已占满容器，设备框切换无意义 */
+  .device-frame{max-height:none}
+  .canvas-wrap{padding:12px}
+  .code-panel{top:0;width:100%;max-width:none;min-width:0}
   .auth-wrap{grid-template-columns:1fr;max-height:92vh;overflow:auto}
   .auth-hero{border-right:none;border-bottom:1px solid var(--line);padding:28px 24px}
   .auth-card{padding:26px 22px}
   .acct-name{display:none}
+}
+
+@media (max-width:620px){
+  .mv-bar{display:flex}
+  .topbar-left .badge{display:none}
+  .app{grid-template-rows:minmax(0,1fr)}
+  /* 对话/预览全屏切换：默认对话视图，生成完成后自动切到预览 */
+  body:not([data-mview="preview"]) .stage{display:none}
+  body[data-mview="preview"] .rail{display:none}
+  .composer{padding-bottom:64px} /* 给底部切换条留位 */
+  .topbar{padding:6px 10px}
+  .topbar-left{gap:8px;min-width:0}
+  #stageTitle{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .ghost-btn,.primary-btn{padding:9px 12px} /* 触控目标 ≥36px */
+  .brand{padding:13px 14px 10px}
+  .composer{padding:10px 12px 12px}
+  .hint{display:none}
+  .chips{flex-wrap:nowrap;overflow-x:auto;padding-bottom:3px;-webkit-overflow-scrolling:touch}
+  .chips .chip{flex:none}
+  .canvas-wrap{padding:10px}
+  .empty{padding:18px}
+  .empty-inner h1{font-size:23px}
+  .empty-inner p{font-size:13px;margin-bottom:16px}
+  .empty-examples{grid-template-columns:1fr;gap:9px}
+  .ex-card{padding:13px 14px}
+  .msg .bubble{font-size:13px}
+  .modal-card{padding:20px 16px}
+  .link-row{flex-wrap:wrap}
+  .link-row input{flex:1 1 150px;min-width:0}
+  /* 登录页在手机上铺满整屏 */
+  .auth-gate{padding:0}
+  .auth-wrap{width:100vw;height:100dvh;max-height:none;border-radius:0;border:none;overflow:auto}
+  .auth-hero h1{font-size:26px}
+  .auth-hero{padding:26px 22px}
+  .auth-card{padding:24px 20px}
 }
