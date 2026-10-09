@@ -367,12 +367,12 @@
   }
 
   /* ---------- main flow ---------- */
-  async function run(promptText, isRefine) {
+  async function run(promptText, isRefine, _noRetry) {
     if (busy) return;
     busy = true; sendBtn.classList.add("busy"); sendBtn.title = "生成中，点击中断";
     empty.classList.add("gone");
     lastPromptText = promptText;
-    addMsg("user", escapeHTML(promptText));
+    if (!_noRetry) addMsg("user", escapeHTML(promptText));
 
     // ---- try real LLM when configured ----
     if (cloudEnabled()) {
@@ -431,6 +431,13 @@
         if (!/<!doctype|<html/i.test(html)) {
           // model replied conversationally instead of returning HTML
           const reply = html.replace(/<[^>]+>/g, "").trim();
+          if (contentLen === 0 && !isRefine && !_noRetry) {
+            // 推理模型把 token 全花在思考上，正文一个字都没输出
+            setAgent(thinkEl, "这轮模型只思考没输出。");
+            addMsg("bot", "云端模型思考超时了（推理太深，没来得及写代码就到长度上限）。我再试一次，通常第二轮会顺很多；如果还不行，可以在右上角「模型」里换一个模型。");
+            busy = false; sendBtn.classList.remove("busy"); sendBtn.title = ""; currentAbort = null;
+            return run(promptText, false, true);
+          }
           setAgent(thinkEl, "这轮没生成应用。");
           if (reply && reply.length < 400) {
             addMsg("bot", "💬 " + escapeHTML(reply));
@@ -549,7 +556,7 @@
 
   /* ---------- LLM integration (real model) ---------- */
   const PROVIDERS = {
-    mimo:     { base: "https://api.xiaomimimo.com/v1", model: "mimo-v2.6-flash" },
+    mimo:     { base: "https://api.xiaomimimo.com/v1", model: "mimo-v2.6-pro-ultraspeed" },
     deepseek: { base: "https://api.deepseek.com/v1", model: "deepseek-chat" },
     openai:   { base: "https://api.openai.com/v1", model: "gpt-4o-mini" },
     qwen:     { base: "https://dashscope.aliyuncs.com/compatible-mode/v1", model: "qwen-plus" },
@@ -557,11 +564,17 @@
     kimi:     { base: "https://api.moonshot.cn/v1", model: "moonshot-v1-8k" },
     custom:   { base: "", model: "" }
   };
-  const DEFAULT_SETTINGS = { provider: "mimo", apiKey: "", model: "mimo-v2.6-flash", baseUrl: "https://api.xiaomimimo.com/v1" };
+  const DEFAULT_SETTINGS = { provider: "mimo", apiKey: "", model: "mimo-v2.6-pro-ultraspeed", baseUrl: "https://api.xiaomimimo.com/v1" };
   function loadSettings() {
     try {
       const s = JSON.parse(localStorage.getItem("forgeSettings") || "null");
-      return s || DEFAULT_SETTINGS;
+      if (!s) return DEFAULT_SETTINGS;
+      // 迁移：mimo-v2.6-flash 推理极慢且易耗尽 token 导致生成失败，统一升级为 ultraspeed
+      if (s.provider === "mimo" && s.model === "mimo-v2.6-flash") {
+        s.model = "mimo-v2.6-pro-ultraspeed";
+        saveSettings(s);
+      }
+      return s;
     } catch (e) { return DEFAULT_SETTINGS; }
   }
   function saveSettings(s) {
@@ -742,7 +755,8 @@
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
       baseUrl: s.baseUrl, apiKey: s.apiKey, model: s.model, messages, stream: true,
-      temperature: s.temperature != null ? Number(s.temperature) : 0.7
+      temperature: s.temperature != null ? Number(s.temperature) : 0.7,
+      max_tokens: 32768
     }),
       signal
     });

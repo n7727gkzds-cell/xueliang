@@ -257,7 +257,7 @@ const server = http.createServer(async (req, res) => {
           messages: cfg.messages || [],
           stream: cfg.stream !== false,
           temperature: cfg.temperature != null ? cfg.temperature : 0.7,
-          max_tokens: cfg.max_tokens || 8192
+          max_tokens: cfg.max_tokens || 32768
         })
       });
       res.writeHead(r.status, {
