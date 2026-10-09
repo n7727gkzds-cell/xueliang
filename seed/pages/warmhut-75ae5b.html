@@ -1,0 +1,1128 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>巷口暖屋 · 社区咖啡馆 | 菜单 · 营业时间 · 地址</title>
+<meta name="description" content="巷口暖屋是一家扎根街角十二年的社区咖啡馆，提供手冲单品、暖阳拿铁、每日现烤甜点，欢迎邻里来坐坐。">
+<style>
+:root{
+  --cream:#FBF3E7;
+  --cream-2:#F5E7D3;
+  --ink:#33231B;
+  --ink-soft:#6B5142;
+  --terra:#C2603C;
+  --terra-dark:#A24A2C;
+  --caramel:#E3A65C;
+  --sage:#7C8B62;
+  --line:rgba(90,60,40,.18);
+  --card:#FFFDF9;
+  --shadow:0 18px 40px -22px rgba(80,45,25,.45);
+  --radius:22px;
+  --serif:"Songti SC","STSong","Noto Serif SC","SimSun",serif;
+  --sans:"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Noto Sans SC",sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+body{
+  font-family:var(--sans);
+  color:var(--ink);
+  background:
+    radial-gradient(1100px 600px at 85% -8%, #F7E4C6 0%, transparent 62%),
+    radial-gradient(900px 520px at -10% 20%, #F6E9D6 0%, transparent 60%),
+    var(--cream);
+  line-height:1.75;
+  overflow-x:hidden;
+}
+img,svg{display:block;max-width:100%}
+a{color:inherit;text-decoration:none}
+button{font:inherit;cursor:pointer;border:none;background:none;color:inherit}
+.wrap{width:min(1180px,92vw);margin:0 auto}
+section{position:relative}
+.eyebrow{
+  display:inline-flex;align-items:center;gap:.6em;
+  font-size:.78rem;letter-spacing:.28em;text-transform:uppercase;
+  color:var(--terra);font-weight:700;
+}
+.eyebrow::before{content:"";width:34px;height:2px;background:var(--terra);opacity:.55}
+h1,h2,h3,h4{font-family:var(--serif);line-height:1.22;letter-spacing:.01em;font-weight:700}
+h2{font-size:clamp(1.9rem,4.2vw,3.1rem)}
+h3{font-size:1.32rem}
+p{color:var(--ink-soft)}
+.lead{font-size:clamp(1.02rem,1.6vw,1.18rem)}
+
+/* ---------- buttons ---------- */
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:.55em;
+  padding:.95em 1.75em;border-radius:999px;font-weight:700;font-size:.98rem;
+  transition:transform .3s cubic-bezier(.2,.8,.3,1),box-shadow .3s,background .3s,color .3s;
+  white-space:nowrap;
+}
+.btn-primary{background:var(--terra);color:#FFF7EC;box-shadow:0 16px 30px -16px rgba(162,74,44,.75)}
+.btn-primary:hover{transform:translateY(-3px);background:var(--terra-dark);box-shadow:0 22px 38px -16px rgba(162,74,44,.8)}
+.btn-ghost{border:1.5px solid var(--line);color:var(--ink);background:rgba(255,255,255,.5)}
+.btn-ghost:hover{transform:translateY(-3px);border-color:var(--terra);color:var(--terra);background:#fff}
+
+/* ---------- nav ---------- */
+header.nav{
+  position:sticky;top:0;z-index:60;
+  backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+  background:rgba(251,243,231,.82);
+  border-bottom:1px solid transparent;transition:border-color .35s,box-shadow .35s,background .35s;
+}
+header.nav.stuck{border-color:var(--line);box-shadow:0 12px 30px -24px rgba(80,45,25,.7)}
+.nav-inner{display:flex;align-items:center;justify-content:space-between;gap:1.4rem;padding:.85rem 0}
+.brand{display:flex;align-items:center;gap:.75rem;font-family:var(--serif);font-size:1.22rem;font-weight:700}
+.brand .mark{
+  width:44px;height:44px;border-radius:14px;flex:none;
+  background:linear-gradient(150deg,var(--terra),var(--caramel));
+  display:grid;place-items:center;box-shadow:0 12px 22px -12px rgba(162,74,44,.7);
+}
+.brand small{display:block;font-family:var(--sans);font-size:.62rem;letter-spacing:.32em;color:var(--ink-soft);font-weight:600;margin-top:-2px}
+.nav-links{display:flex;align-items:center;gap:.35rem}
+.nav-links a{
+  padding:.55em 1em;border-radius:999px;font-size:.93rem;font-weight:600;color:var(--ink-soft);
+  transition:color .25s,background .25s;
+}
+.nav-links a:hover{color:var(--terra);background:rgba(194,96,60,.1)}
+.nav-cta{display:flex;align-items:center;gap:.7rem}
+.nav-toggle{display:none;width:46px;height:46px;border-radius:14px;border:1px solid var(--line);place-items:center}
+.nav-toggle span{display:block;width:20px;height:2px;background:var(--ink);position:relative;transition:.3s}
+.nav-toggle span::before,.nav-toggle span::after{content:"";position:absolute;left:0;width:20px;height:2px;background:var(--ink);transition:.3s}
+.nav-toggle span::before{top:-6px}.nav-toggle span::after{top:6px}
+.nav-toggle.open span{background:transparent}
+.nav-toggle.open span::before{top:0;transform:rotate(45deg)}
+.nav-toggle.open span::after{top:0;transform:rotate(-45deg)}
+
+/* ---------- hero ---------- */
+.hero{padding:clamp(2.6rem,6vw,5.4rem) 0 clamp(3rem,7vw,6rem)}
+.hero-grid{display:grid;grid-template-columns:1.05fr .95fr;gap:clamp(2rem,5vw,4.4rem);align-items:center}
+.hero h1{font-size:clamp(2.55rem,6.4vw,5rem);letter-spacing:-.015em}
+.hero h1 em{
+  font-style:normal;position:relative;color:var(--terra);white-space:nowrap;
+}
+.hero h1 em::after{
+  content:"";position:absolute;left:0;right:0;bottom:.08em;height:.28em;
+  background:rgba(227,166,92,.42);border-radius:99px;z-index:-1;transform:rotate(-.8deg);
+}
+.hero p.lead{margin:1.5rem 0 2.1rem;max-width:33ch}
+.hero-actions{display:flex;flex-wrap:wrap;gap:.85rem}
+.hero-stats{display:flex;gap:clamp(1.4rem,4vw,2.8rem);margin-top:2.8rem;flex-wrap:wrap}
+.stat strong{display:block;font-family:var(--serif);font-size:1.85rem;color:var(--terra);line-height:1.1}
+.stat span{font-size:.83rem;letter-spacing:.12em;color:var(--ink-soft)}
+.hero-art{position:relative}
+.art-frame{
+  position:relative;border-radius:200px 200px 28px 28px;overflow:hidden;
+  background:linear-gradient(165deg,#EED4AE,#D89A63 55%,#B8623B);
+  box-shadow:var(--shadow);aspect-ratio:4/4.6;
+}
+.art-frame::after{
+  content:"";position:absolute;inset:12px;border-radius:190px 190px 20px 20px;
+  border:1.5px dashed rgba(255,247,236,.42);
+}
+.badge{
+  position:absolute;background:var(--card);border-radius:18px;padding:.85rem 1.15rem;
+  box-shadow:0 22px 42px -22px rgba(80,45,25,.7);border:1px solid var(--line);
+  display:flex;align-items:center;gap:.75rem;font-size:.85rem;font-weight:600;
+}
+.badge .dot{width:38px;height:38px;border-radius:12px;flex:none;display:grid;place-items:center;background:rgba(194,96,60,.12)}
+.badge b{display:block;font-family:var(--serif);font-size:1.02rem}
+.badge small{color:var(--ink-soft);font-weight:500;font-size:.76rem;letter-spacing:.05em}
+.badge.b1{top:8%;left:-8%}
+.badge.b2{bottom:9%;right:-6%}
+.badge.b3{bottom:32%;left:-12%}
+.steam{position:absolute;left:50%;top:12%;transform:translateX(-50%);opacity:.75}
+
+/* ---------- marquee strip ---------- */
+.strip{background:var(--ink);color:#F7E9D6;padding:.95rem 0;overflow:hidden;white-space:nowrap}
+.strip-track{display:inline-flex;gap:3.2rem;animation:slide 32s linear infinite;font-family:var(--serif);font-size:1.02rem;letter-spacing:.06em}
+.strip-track span{display:inline-flex;align-items:center;gap:3.2rem}
+.strip-track i{width:8px;height:8px;border-radius:50%;background:var(--caramel);display:inline-block;font-style:normal}
+@keyframes slide{to{transform:translateX(-50%)}}
+
+/* ---------- section head ---------- */
+.sec-head{display:flex;align-items:flex-end;justify-content:space-between;gap:2rem;flex-wrap:wrap;margin-bottom:clamp(1.9rem,4vw,3rem)}
+.sec-head p{max-width:46ch;margin-top:.85rem}
+.sec{padding:clamp(3.6rem,8vw,6.6rem) 0}
+
+/* ---------- story ---------- */
+.story{background:linear-gradient(180deg,transparent,rgba(245,231,211,.72),transparent)}
+.story-grid{display:grid;grid-template-columns:.95fr 1.05fr;gap:clamp(2rem,5vw,4.5rem);align-items:center}
+.story-photos{position:relative;display:grid;grid-template-columns:1fr 1fr;gap:1.1rem}
+.photo{
+  border-radius:20px;overflow:hidden;box-shadow:var(--shadow);background:#E8C79B;position:relative;
+}
+.photo.tall{grid-row:span 2;aspect-ratio:3/4.5}
+.photo.short{aspect-ratio:4/3.4}
+.photo .cap{
+  position:absolute;left:12px;bottom:12px;background:rgba(51,35,27,.72);color:#F8ECDB;
+  padding:.35em .85em;border-radius:99px;font-size:.72rem;letter-spacing:.12em;backdrop-filter:blur(6px);
+}
+.story-text h2{margin:1rem 0 1.3rem}
+.story-text p+p{margin-top:1.05rem}
+.quote{
+  margin:2rem 0 1.4rem;padding:1.5rem 1.6rem;border-left:3px solid var(--terra);
+  background:rgba(255,255,255,.55);border-radius:0 18px 18px 0;
+  font-family:var(--serif);font-size:1.14rem;color:var(--ink);
+}
+.quote small{display:block;margin-top:.65rem;font-family:var(--sans);font-size:.82rem;letter-spacing:.14em;color:var(--terra);font-weight:700}
+
+/* ---------- menu ---------- */
+.tabs{display:flex;flex-wrap:wrap;gap:.6rem;margin-bottom:2.2rem}
+.tab{
+  padding:.68em 1.35em;border-radius:999px;border:1.5px solid var(--line);
+  font-size:.92rem;font-weight:700;color:var(--ink-soft);background:rgba(255,255,255,.5);
+  transition:.28s;
+}
+.tab:hover{border-color:var(--terra);color:var(--terra)}
+.tab.active{background:var(--ink);color:#FBF3E7;border-color:var(--ink)}
+.menu-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:1.05rem}
+.item{
+  background:var(--card);border:1px solid var(--line);border-radius:18px;padding:1.35rem 1.45rem;
+  display:flex;flex-direction:column;gap:.45rem;position:relative;overflow:hidden;
+  transition:transform .35s cubic-bezier(.2,.8,.3,1),box-shadow .35s,border-color .35s;
+}
+.item:hover{transform:translateY(-5px);box-shadow:0 26px 46px -28px rgba(80,45,25,.75);border-color:rgba(194,96,60,.4)}
+.item .top{display:flex;justify-content:space-between;align-items:baseline;gap:1rem}
+.item h4{font-size:1.13rem}
+.item .price{font-family:var(--serif);color:var(--terra);font-size:1.22rem;font-weight:700;white-space:nowrap}
+.item p{font-size:.91rem;line-height:1.65}
+.tags{display:flex;gap:.42rem;flex-wrap:wrap;margin-top:.35rem}
+.tag{font-size:.71rem;letter-spacing:.08em;padding:.24em .75em;border-radius:99px;background:rgba(124,139,98,.16);color:#5C6B45;font-weight:700}
+.tag.hot{background:rgba(194,96,60,.14);color:var(--terra)}
+.menu-note{
+  margin-top:2.2rem;padding:1.25rem 1.5rem;border:1.5px dashed var(--line);border-radius:18px;
+  font-size:.92rem;display:flex;gap:1rem;align-items:center;flex-wrap:wrap;color:var(--ink-soft);
+}
+.menu-note b{color:var(--terra)}
+
+/* ---------- hours + map ---------- */
+.visit{background:var(--ink);color:#F6E7D3;border-radius:38px;padding:clamp(2.2rem,5vw,4.2rem);position:relative;overflow:hidden}
+.visit::before{
+  content:"";position:absolute;width:520px;height:520px;border-radius:50%;right:-160px;top:-180px;
+  background:radial-gradient(circle,rgba(227,166,92,.28),transparent 68%);
+}
+.visit::after{
+  content:"";position:absolute;width:420px;height:420px;border-radius:50%;left:-180px;bottom:-200px;
+  background:radial-gradient(circle,rgba(194,96,60,.3),transparent 68%);
+}
+.visit .wrap-inner{position:relative;z-index:2;display:grid;grid-template-columns:1.05fr .95fr;gap:clamp(2rem,5vw,4rem);align-items:start}
+.visit h2{color:#FFF3E2}
+.visit p{color:rgba(246,231,211,.78)}
+.status{
+  display:inline-flex;align-items:center;gap:.75rem;padding:.75em 1.35em;border-radius:999px;
+  background:rgba(124,139,98,.22);border:1px solid rgba(180,200,150,.35);
+  font-weight:700;font-size:.92rem;color:#E7F0D5;margin:1.35rem 0 1.9rem;
+}
+.status .pulse{width:11px;height:11px;border-radius:50%;background:#9BC46B;position:relative;flex:none}
+.status .pulse::after{content:"";position:absolute;inset:-6px;border-radius:50%;border:1.5px solid #9BC46B;opacity:.5;animation:ping 1.9s ease-out infinite}
+.status.closed{background:rgba(194,96,60,.22);border-color:rgba(226,140,105,.42);color:#F6D3BF}
+.status.closed .pulse{background:#E28C69}
+.status.closed .pulse::after{border-color:#E28C69}
+@keyframes ping{0%{transform:scale(.6);opacity:.7}100%{transform:scale(1.6);opacity:0}}
+.hours{width:100%;border-collapse:collapse;margin-top:.4rem}
+.hours th{text-align:left;font-family:var(--sans);font-size:.74rem;letter-spacing:.22em;color:rgba(246,231,211,.6);font-weight:700;padding-bottom:.8rem;text-transform:uppercase}
+.hours td{padding:.85rem 0;border-top:1px solid rgba(246,231,211,.16);font-size:1rem}
+.hours td:last-child{text-align:right;font-family:var(--serif);letter-spacing:.04em}
+.hours tr.today td{color:#F7C99A;font-weight:700}
+.hours tr.today td:first-child::after{content:"今天";margin-left:.75em;font-size:.68rem;letter-spacing:.14em;background:var(--caramel);color:#3B2A21;padding:.16em .7em;border-radius:99px;vertical-align:middle;font-family:var(--sans)}
+.info-card{
+  background:rgba(255,247,236,.07);border:1px solid rgba(246,231,211,.18);
+  border-radius:22px;padding:1.65rem;backdrop-filter:blur(4px);
+}
+.info-card+.info-card{margin-top:1.05rem}
+.info-card h4{font-size:1.08rem;color:#FFF3E2;margin-bottom:.65rem;display:flex;align-items:center;gap:.65rem}
+.info-card p{font-size:.95rem;line-height:1.85}
+.info-card a.link{color:#F7C99A;border-bottom:1px dashed rgba(247,201,154,.55);padding-bottom:1px}
+.info-card a.link:hover{color:#fff;border-color:#fff}
+.map{
+  margin-top:1.05rem;border-radius:20px;overflow:hidden;border:1px solid rgba(246,231,211,.18);
+  background:#241812;
+}
+.map svg{width:100%;height:auto;display:block}
+.map-cap{padding:.85rem 1.15rem;font-size:.84rem;color:rgba(246,231,211,.72);display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap}
+.route-list{display:flex;flex-wrap:wrap;gap:.55rem;margin-top:1.15rem}
+.route{font-size:.82rem;padding:.5em 1em;border-radius:99px;border:1px solid rgba(246,231,211,.22);color:rgba(246,231,211,.85);transition:.28s}
+.route:hover{background:rgba(246,231,211,.12);transform:translateY(-2px)}
+
+/* ---------- events ---------- */
+.events-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:1.15rem}
+.event{
+  padding:1.85rem 1.75rem;border-radius:22px;background:var(--card);border:1px solid var(--line);
+  position:relative;overflow:hidden;transition:transform .35s,box-shadow .35s;
+}
+.event:hover{transform:translateY(-6px);box-shadow:0 28px 48px -30px rgba(80,45,25,.8)}
+.event .when{
+  display:inline-block;font-size:.76rem;letter-spacing:.18em;font-weight:700;color:var(--terra);
+  background:rgba(194,96,60,.1);padding:.32em .95em;border-radius:99px;margin-bottom:.95rem;
+}
+.event h3{margin-bottom:.6rem}
+.event p{font-size:.93rem}
+.event .num{
+  position:absolute;right:1.15rem;top:.65rem;font-family:var(--serif);font-size:3.4rem;
+  color:rgba(194,96,60,.12);line-height:1;
+}
+
+/* ---------- voices ---------- */
+.voices{background:rgba(245,231,211,.62);border-radius:38px;padding:clamp(2.2rem,5vw,3.8rem) clamp(1.4rem,4vw,3.4rem)}
+.voice-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:1.25rem;margin-top:2.4rem}
+.voice{background:var(--card);border-radius:20px;padding:1.85rem 1.75rem;border:1px solid var(--line);position:relative}
+.voice .stars{color:var(--caramel);letter-spacing:.22em;font-size:.92rem}
+.voice p{margin:.95rem 0 1.35rem;font-family:var(--serif);font-size:1.06rem;color:var(--ink);line-height:1.85}
+.voice .who{display:flex;align-items:center;gap:.75rem}
+.avatar{width:42px;height:42px;border-radius:50%;flex:none;display:grid;place-items:center;font-family:var(--serif);font-weight:700;color:#fff}
+.voice .who b{font-size:.92rem;display:block}
+.voice .who small{color:var(--ink-soft);font-size:.78rem;letter-spacing:.1em}
+
+/* ---------- cta ---------- */
+.cta{
+  border-radius:34px;padding:clamp(2.4rem,5.5vw,4.4rem);
+  background:linear-gradient(135deg,var(--terra),#D68A4C 62%,var(--caramel));
+  color:#FFF6E9;text-align:center;position:relative;overflow:hidden;
+}
+.cta::before,.cta::after{content:"";position:absolute;border-radius:50%;border:1.5px solid rgba(255,246,233,.28)}
+.cta::before{width:340px;height:340px;top:-150px;left:-110px}
+.cta::after{width:420px;height:420px;bottom:-230px;right:-130px}
+.cta h2{color:#FFF6E9;position:relative;z-index:2}
+.cta p{color:rgba(255,246,233,.9);max-width:52ch;margin:1.15rem auto 2.15rem;position:relative;z-index:2}
+.cta .btn-primary{background:#FFF6E9;color:var(--terra-dark);box-shadow:0 18px 36px -18px rgba(60,25,10,.6)}
+.cta .btn-primary:hover{background:#fff}
+.cta .btn-ghost{border-color:rgba(255,246,233,.6);color:#FFF6E9;background:rgba(255,255,255,.08)}
+.cta .btn-ghost:hover{background:rgba(255,255,255,.2);color:#fff;border-color:#fff}
+.cta-actions{display:flex;gap:.9rem;justify-content:center;flex-wrap:wrap;position:relative;z-index:2}
+
+/* ---------- footer ---------- */
+footer{background:var(--ink);color:rgba(246,231,211,.8);margin-top:clamp(3.5rem,7vw,6rem);padding:clamp(3rem,6vw,4.6rem) 0 2rem}
+.foot-grid{display:grid;grid-template-columns:1.5fr 1fr 1fr 1.25fr;gap:2.4rem}
+footer h4{color:#FFF3E2;font-size:1.05rem;margin-bottom:1.15rem}
+footer .brand{color:#FFF3E2}
+footer .brand small{color:rgba(246,231,211,.62)}
+.foot-links{display:flex;flex-direction:column;gap:.72rem;font-size:.93rem}
+.foot-links a{color:rgba(246,231,211,.72);transition:.25s;width:fit-content}
+.foot-links a:hover{color:var(--caramel);transform:translateX(4px)}
+.subscribe{display:flex;gap:.55rem;margin-top:1.05rem;flex-wrap:wrap}
+.subscribe input{
+  flex:1 1 180px;min-width:0;padding:.85em 1.15em;border-radius:999px;border:1px solid rgba(246,231,211,.25);
+  background:rgba(255,255,255,.07);color:#FFF3E2;font-size:.92rem;outline:none;transition:.25s;
+}
+.subscribe input:focus{border-color:var(--caramel);background:rgba(255,255,255,.13)}
+.subscribe input::placeholder{color:rgba(246,231,211,.5)}
+.subscribe button{padding:.85em 1.55em;border-radius:999px;background:var(--caramel);color:#3B2A21;font-weight:700;font-size:.92rem;transition:.28s}
+.subscribe button:hover{background:#F0BE79;transform:translateY(-2px)}
+.msg{font-size:.84rem;margin-top:.85rem;min-height:1.2em;color:#C6E3A2}
+.foot-bottom{
+  margin-top:3rem;padding-top:1.65rem;border-top:1px solid rgba(246,231,211,.16);
+  display:flex;justify-content:space-between;gap:1.2rem;flex-wrap:wrap;font-size:.84rem;color:rgba(246,231,211,.58);
+}
+
+/* ---------- reveal ---------- */
+.reveal{opacity:0;transform:translateY(26px);transition:opacity .85s ease,transform .85s cubic-bezier(.2,.8,.3,1)}
+.reveal.in{opacity:1;transform:none}
+.d1{transition-delay:.09s}.d2{transition-delay:.18s}.d3{transition-delay:.27s}.d4{transition-delay:.36s}
+
+/* ---------- responsive ---------- */
+@media(max-width:1020px){
+  .hero-grid,.story-grid,.visit .wrap-inner{grid-template-columns:1fr}
+  .hero-art{max-width:520px;margin:2.6rem auto 0;width:100%}
+  .badge.b1{left:0}.badge.b2{right:0}.badge.b3{left:0}
+  .foot-grid{grid-template-columns:1fr 1fr}
+}
+@media(max-width:780px){
+  .nav-links{
+    position:absolute;top:calc(100% + 1px);left:0;right:0;flex-direction:column;align-items:stretch;
+    background:var(--cream);padding:1rem 4vw 1.5rem;gap:.15rem;border-bottom:1px solid var(--line);
+    box-shadow:0 24px 40px -30px rgba(80,45,25,.8);
+    clip-path:inset(0 0 100% 0);opacity:0;pointer-events:none;transition:clip-path .42s ease,opacity .3s;
+  }
+  .nav-links.open{clip-path:inset(0 0 0 0);opacity:1;pointer-events:auto}
+  .nav-links a{padding:.85em 1em;font-size:1.02rem}
+  .nav-toggle{display:grid}
+  .nav-cta .btn-ghost{display:none}
+  .hero-stats{gap:1.5rem 2rem}
+  .sec{padding:3.4rem 0}
+  .visit{border-radius:26px}
+}
+@media(max-width:520px){
+  .foot-grid{grid-template-columns:1fr;gap:1.9rem}
+  .story-photos{grid-template-columns:1fr 1fr;gap:.75rem}
+  .badge{padding:.7rem .9rem;font-size:.78rem}
+  .badge.b3{display:none}
+  .cta{border-radius:24px}
+}
+@media(prefers-reduced-motion:reduce){
+  *{animation-duration:.001s!important;transition-duration:.18s!important}
+  .reveal{opacity:1;transform:none}
+}
+</style>
+</head>
+<body>
+
+<header class="nav" id="nav">
+  <div class="wrap nav-inner">
+    <a href="#top" class="brand" aria-label="巷口暖屋 首页">
+      <span class="mark" aria-hidden="true">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+          <path d="M4.2 8.4h11.2v4.6a5.6 5.6 0 0 1-5.6 5.6 5.6 5.6 0 0 1-5.6-5.6V8.4Z" fill="#FFF3E2"/>
+          <path d="M15.6 9.6h1.7a2.5 2.5 0 0 1 0 5h-.9" stroke="#FFF3E2" stroke-width="1.7" stroke-linecap="round"/>
+          <path d="M8 5.4c.9-.9.9-1.7 0-2.6M11.4 5.4c.9-.9.9-1.7 0-2.6" stroke="#FFF3E2" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+      </span>
+      <span>巷口暖屋<small>XIANGKOU COFFEE</small></span>
+    </a>
+
+    <nav class="nav-links" id="navLinks">
+      <a href="#story">品牌故事</a>
+      <a href="#menu">菜单</a>
+      <a href="#visit">营业时间</a>
+      <a href="#visit">地址与交通</a>
+      <a href="#events">社区活动</a>
+    </nav>
+
+    <div class="nav-cta">
+      <a href="tel:02158203366" class="btn btn-ghost">021-5820 3366</a>
+      <a href="#menu" class="btn btn-primary">今日喝什么</a>
+      <button class="nav-toggle" id="navToggle" aria-label="展开菜单" aria-expanded="false"><span></span></button>
+    </div>
+  </div>
+</header>
+
+<main id="top">
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="wrap hero-grid">
+      <div>
+        <span class="eyebrow reveal">社区咖啡馆 · 自 2013 年</span>
+        <h1 class="reveal d1">一杯咖啡，<br>把陌生的街角<em>焐热</em>。</h1>
+        <p class="lead reveal d2">
+          我们在梧桐树下守着一间三十平米的小屋，煮豆子、烤面包、记住每位邻居的名字。
+          没有打卡的喧闹，只有刚出炉的香气和一张永远留给你 的靠窗座位。
+        </p>
+        <div class="hero-actions reveal d3">
+          <a href="#menu" class="btn btn-primary">
+            查看完整菜单
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </a>
+          <a href="#visit" class="btn btn-ghost">营业时间 & 地址</a>
+        </div>
+        <div class="hero-stats reveal d4">
+          <div class="stat"><strong>12<span style="font-size:1.05rem">年</span></strong><span>扎根这条街</span></div>
+          <div class="stat"><strong>30+</strong><span>每周现烘豆单</span></div>
+          <div class="stat"><strong>4.9</strong><span>邻里口碑评分</span></div>
+        </div>
+      </div>
+
+      <div class="hero-art reveal d2">
+        <div class="art-frame">
+          <svg viewBox="0 0 400 460" width="100%" height="100%" preserveAspectRatio="xMidYMid slice" aria-label="咖啡杯插画">
+            <defs>
+              <linearGradient id="cupG" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0" stop-color="#FFF6E9"/><stop offset="1" stop-color="#F2D9B8"/>
+              </linearGradient>
+              <radialGradient id="glow" cx="50%" cy="30%">
+                <stop offset="0" stop-color="#FFE7C0" stop-opacity=".9"/><stop offset="1" stop-color="#FFE7C0" stop-opacity="0"/>
+              </radialGradient>
+            </defs>
+            <rect width="400" height="460" fill="url(#glow)"/>
+            <g opacity=".35" fill="none" stroke="#FFF3E2" stroke-width="2">
+              <circle cx="70" cy="70" r="30"/><circle cx="330" cy="110" r="18"/>
+              <circle cx="320" cy="330" r="46"/><circle cx="86" cy="356" r="22"/>
+            </g>
+            <!-- steam -->
+            <g stroke="#FFF6E9" stroke-width="6" stroke-linecap="round" opacity=".55" fill="none">
+              <path d="M175 128c12-14-12-26 0-40s-8-24 0-34"/>
+              <path d="M212 132c12-14-12-26 0-40s-8-24 0-34"/>
+            </g>
+            <!-- saucer -->
+            <ellipse cx="200" cy="330" rx="128" ry="30" fill="#E8C79B" opacity=".85"/>
+            <ellipse cx="200" cy="322" rx="112" ry="24" fill="#F7E4C6"/>
+            <!-- cup -->
+            <path d="M112 176h176l-16 118a58 58 0 0 1-57 50h-30a58 58 0 0 1-57-50l-16-118Z" fill="url(#cupG)"/>
+            <path d="M112 176h176l-4 26H116l-4-26Z" fill="#EBD2AE"/>
+            <!-- handle -->
+            <path d="M290 200h18a34 34 0 0 1 0 68h-27" fill="none" stroke="#F2D9B8" stroke-width="17" stroke-linecap="round"/>
+            <!-- coffee surface -->
+            <ellipse cx="200" cy="188" rx="82" ry="17" fill="#7A4630"/>
+            <ellipse cx="200" cy="186" rx="62" ry="12" fill="#B07A50" opacity=".85"/>
+            <path d="M168 186c14-8 28 8 42 0s22-9 30-2" stroke="#F5E2C7" stroke-width="4" fill="none" stroke-linecap="round" opacity=".8"/>
+            <!-- beans -->
+            <g transform="rotate(-18 118 268)">
+              <ellipse cx="118" cy="268" rx="17" ry="11" fill="#8B573A"/>
+              <path d="M105 268c8-5 18-5 26 0" stroke="#E7C79E" stroke-width="3" fill="none" stroke-linecap="round"/>
+            </g>
+            <g transform="rotate(22 286 272)">
+              <ellipse cx="286" cy="272" rx="15" ry="10" fill="#8B573A"/>
+              <path d="M275 272c7-4 15-4 22 0" stroke="#E7C79E" stroke-width="2.6" fill="none" stroke-linecap="round"/>
+            </g>
+          </svg>
+        </div>
+
+        <div class="badge b1">
+          <span class="dot" aria-hidden="true">
+            <svg width="19" height="19" viewBox="0 0 24 24" fill="none"><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M18.4 5.6l-2.1 2.1M7.7 16.3l-2.1 2.1" stroke="#C2603C" stroke-width="1.9" stroke-linecap="round"/><circle cx="12" cy="12" r="3.4" stroke="#C2603C" stroke-width="1.9"/></svg>
+          </span>
+          <span><b>07:30 开门</b><small>第一炉可颂出炉</small></span>
+        </div>
+
+        <div class="badge b2">
+          <span class="dot" aria-hidden="true">
+            <svg width="19" height="19" viewBox="0 0 24 24" fill="none"><path d="M12 20s-7-4.2-7-9.2A4 4 0 0 1 12 8.4 4 4 0 0 1 19 10.8c0 5-7 9.2-7 9.2Z" stroke="#C2603C" stroke-width="1.8" stroke-linejoin="round"/></svg>
+          </span>
+          <span><b>自带杯 −5 元</b><small>为这条街少一只纸杯</small></span>
+        </div>
+
+        <div class="badge b3">
+          <span class="dot" aria-hidden="true">
+            <svg width="19" height="19" viewBox="0 0 24 24" fill="none"><rect x="4" y="5" width="16" height="15" rx="3" stroke="#C2603C" stroke-width="1.8"/><path d="M8 3v4M16 3v4M4 10h16" stroke="#C2603C" stroke-width="1.8" stroke-linecap="round"/></svg>
+          </span>
+          <span><b>周三读书会</b><small>19:30 · 二楼小屋</small></span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- STRIP -->
+  <div class="strip" aria-hidden="true">
+    <div class="strip-track">
+      <span>手冲单品<i></i>每日现烤<i></i>邻里共享桌<i></i>燕麦奶可选<i></i>宠物友好<i></i>二手书角<i></i>自家烘焙豆<i></i>免费续杯的热水<i></i></span>
+      <span>手冲单品<i></i>每日现烤<i></i>邻里共享桌<i></i>燕麦奶可选<i></i>宠物友好<i></i>二手书角<i></i>自家烘焙豆<i></i>免费续杯的热水<i></i></span>
+    </div>
+  </div>
+
+  <!-- STORY -->
+  <section class="sec story" id="story">
+    <div class="wrap story-grid">
+      <div class="story-photos reveal">
+        <div class="photo tall">
+          <svg viewBox="0 0 300 450" width="100%" height="100%" preserveAspectRatio="xMidYMid slice" aria-label="咖啡馆吧台">
+            <rect width="300" height="450" fill="#C98B57"/>
+            <rect y="300" width="300" height="150" fill="#8A5637"/>
+            <rect y="288" width="300" height="18" fill="#A8683F"/>
+            <g fill="#F5E3C6"><rect x="34" y="70" width="70" height="120" rx="10"/><rect x="120" y="70" width="70" height="120" rx="10"/><rect x="206" y="70" width="60" height="120" rx="10"/></g>
+            <g fill="#7C4B2E" opacity=".8"><rect x="44" y="86" width="50" height="88" rx="6"/><rect x="130" y="86" width="50" height="88" rx="6"/><rect x="216" y="86" width="40" height="88" rx="6"/></g>
+            <rect x="70" y="230" width="160" height="66" rx="12" fill="#3D281B"/>
+            <rect x="92" y="248" width="52" height="30" rx="8" fill="#E2A85F"/>
+            <rect x="158" y="248" width="52" height="30" rx="8" fill="#E2A85F"/>
+            <circle cx="118" cy="263" r="7" fill="#6B3C22"/><circle cx="184" cy="263" r="7" fill="#6B3C22"/>
+            <rect x="40" y="352" width="220" height="14" rx="7" fill="#6E4227"/>
+            <rect x="70" y="366" width="14" height="70" fill="#6E4227"/><rect x="216" y="366" width="14" height="70" fill="#6E4227"/>
+          </svg>
+          <span class="cap">吧台 · 每天 06:40 生火</span>
+        </div>
+        <div class="photo short">
+          <svg viewBox="0 0 300 255" width="100%" height="100%" preserveAspectRatio="xMidYMid slice" aria-label="咖啡豆">
+            <rect width="300" height="255" fill="#E7C69B"/>
+            <g fill="#7B4B2E">
+              <ellipse cx="70" cy="80" rx="30" ry="21" transform="rotate(-20 70 80)"/>
+              <ellipse cx="160" cy="66" rx="28" ry="19" transform="rotate(14 160 66)"/>
+              <ellipse cx="235" cy="112" rx="31" ry="21" transform="rotate(-8 235 112)"/>
+              <ellipse cx="108" cy="168" rx="32" ry="22" transform="rotate(22 108 168)"/>
+              <ellipse cx="205" cy="192" rx="29" ry="20" transform="rotate(-16 205 192)"/>
+            </g>
+            <g stroke="#F0D5AF" stroke-width="5" fill="none" stroke-linecap="round">
+              <path d="M48 80c14-9 30-9 44 0"/><path d="M140 66c13-8 27-8 40 0"/>
+              <path d="M212 112c15-9 31-9 46 0"/><path d="M84 168c16-10 32-10 48 0"/>
+              <path d="M183 192c14-9 28-9 42 0"/>
+            </g>
+          </svg>
+          <span class="cap">本周豆单</span>
+        </div>
+        <div class="photo short">
+          <svg viewBox="0 0 300 255" width="100%" height="100%" preserveAspectRatio="xMidYMid slice" aria-label="窗边座位">
+            <rect width="300" height="255" fill="#F2DCB7"/>
+            <rect x="40" y="30" width="220" height="150" rx="14" fill="#B9D3D8"/>
+            <path d="M40 130c40-24 70 8 110-10s70 6 110-12v72a14 14 0 0 1-14 14H54a14 14 0 0 1-14-14v-50Z" fill="#8FAE7E"/>
+            <rect x="146" y="30" width="8" height="150" fill="#F2DCB7"/><rect x="40" y="100" width="220" height="8" fill="#F2DCB7"/>
+            <rect x="60" y="196" width="180" height="14" rx="7" fill="#9A6239"/>
+            <rect x="82" y="210" width="12" height="38" fill="#9A6239"/><rect x="206" y="210" width="12" height="38" fill="#9A6239"/>
+            <ellipse cx="150" cy="190" rx="26" ry="9" fill="#FFF3E2"/>
+            <path d="M132 178h36l-4 14h-28l-4-14Z" fill="#D98B4C"/>
+          </svg>
+          <span class="cap">靠窗的老位置</span>
+        </div>
+      </div>
+
+      <div class="story-text">
+        <span class="eyebrow reveal">我们的故事</span>
+        <h2 class="reveal d1">从一台二手烘焙机，<br>到整条街的客厅。</h2>
+        <p class="lead reveal d2">
+          2013 年冬天，阿禾和小满用攒了三年的积蓄，在梧桐里 42 号租下一间漏水的旧杂货铺。
+          房东张阿姨说：「先做起来，房租晚点交没关系。」那台二手烘焙机第一次响起来时，整条巷子都闻到了味道。
+        </p>
+        <p class="reveal d2">
+          十二年过去，我们依旧只做两件事：把豆子烘好，把人等来。我们认识每天七点半来拿燕麦拿铁的快递小哥，
+          也记得那位每周三坐在窗边改论文的高中生。店里的留言本已经写满到第七册，每一页都是这条街的天气。
+        </p>
+        <div class="quote reveal d3">
+          「咖啡只是理由，让我们每天在同一张桌子旁，成为彼此生活的一部分。」
+          <small>— 阿禾 &amp; 尻满，巷口暖屋主理人</small>
+        </div>
+        <div class="hero-actions reveal d3">
+          <a href="#events" class="btn btn-primary">看看这周的活动</a>
+          <a href="#visit" class="btn btn-ghost">来店里坐坐</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- MENU -->
+  <section class="sec" id="menu">
+    <div class="wrap">
+      <div class="sec-head">
+        <div>
+          <span class="eyebrow reveal">当季菜单</span>
+          <h2 class="reveal d1">今日豆单与<br>刚出炉的香气</h2>
+        </div>
+        <p class="reveal d2">
+          菜单每季微调，豆子每周三上新。所有饮品可选全脂 / 脱脂 / 燕麦奶（+4 元），
+          自带杯一律减 5 元。价格单位：元。
+        </p>
+      </div>
+
+      <div class="tabs reveal" id="tabs" role="tablist">
+        <button class="tab active" data-filter="all" role="tab" aria-selected="true">全部</button>
+        <button class="tab" data-filter="coffee" role="tab" aria-selected="false">意式 &amp; 手冲</button>
+        <button class="tab" data-filter="noncoffee" role="tab" aria-selected="false">非咖啡</button>
+        <button class="tab" data-filter="dessert" role="tab" aria-selected="false">烘焙甜点</button>
+        <button class="tab" data-filter="food" role="tab" aria-selected="false">轻食</button>
+      </div>
+
+      <div class="menu-grid" id="menuGrid">
+        <article class="item reveal" data-cat="coffee">
+          <div class="top"><h4>招牌暖阳拿铁</h4><span class="price">¥32</span></div>
+          <p>双份浓缩 + 蒸煮牛奶，表面撒一层锡兰肉桂与黄糖，冬日里点单率第一。</p>
+          <div class="tags"><span class="tag hot">招牌</span><span class="tag">可做冰 / 热</span></div>
+        </article>
+
+        <article class="item reveal" data-cat="coffee">
+          <div class="top"><h4>手冲单品 · 耶加雪菲</h4><span class="price">¥38</span></div>
+          <p>埃塞俄比亚水洗，柑橘与茉莉花香明显，尾韵带蜂蜜甜感，出品约 8 分钟。</p>
+          <div class="tags"><span class="tag hot">本周豆单</span><span class="tag">浅烘焙</span></div>
+        </article>
+
+        <article class="item reveal" data-cat="coffee">
+          <div class="top"><h4>澳白 Flat White</h4><span class="price">¥30</span></div>
+          <p>更小的杯、更浓的奶咖比例，口感绵密不厚重，适合喜欢咖啡味突出的你。</p>
+          <div class="tags"><span class="tag">奶咖</span></div>
+        </article>
+
+        <article class="item reveal" data-cat="coffee">
+          <div class="top"><h4>燕麦拿铁</h4><span class="price">¥34</span></div>
+          <p>醇厚燕麦奶与中深烘浓缩的组合，植物基、乳糖不耐也能安心喝。</p>
+          <div class="tags"><span class="tag">植物基</span><span class="tag">人气</span></div>
+        </article>
+
+        <article class="item reveal" data-cat="coffee">
+          <div class="top"><h4>冰美式</h4><span class="price">¥26</span></div>
+          <p>大杯 480ml，浓缩现萃后快速降温，清爽不苦涩，夏天的续命水。</p>
+          <div class="tags"><span class="tag">低卡</span></div>
+        </article>
+
+        <article class="item reveal" data-cat="coffee">
+          <div class="top"><h4>焦糖海盐摩卡</h4><span class="price">¥36</span></div>
+          <p>70% 黑巧酱、浓缩、蒸奶，最后点上一撮海盐焦糖，甜而不腻。</p>
+          <div class="tags"><span class="tag hot">冬季限定</span></div>
+        </article>
+
+        <article class="item reveal" data-cat="noncoffee">
+          <div class="top"><h4>桂花乌龙冷泡</h4><span class="price">¥28</span></div>
+          <p>八小时低温冷萃，桂花香清雅，无糖，回甘干净。</p>
+          <div class="tags"><span class="tag">无咖啡因可选</span></div>
+        </article>
+
+        <article class="item reveal" data-cat="noncoffee">
+          <div class="top"><h4>手工姜汁热可可</h4><span class="price">¥32</span></div>
+          <p>现磨老姜与纯可可粉熬煮，淋上奶泡，寒潮天的救命热饮。</p>
+          <div class="tags"><span class="tag hot">冬日限定</span><span class="tag">无咖啡因</span></div>
+        </article>
+
+        <article class="item reveal" data-cat="noncoffee">
+          <div class="top"><h4>宇治抹茶拿铁</h4><span class="price">¥32</span></div>
+          <p>京都丸久小山园抹茶，茶味清苦，甜度可调（无糖 / 微糖 / 半糖）。</p>
+          <div class="tags"><span class="tag">甜度可调</span></div>
+        </article>
+
+        <article class="item reveal" data-cat="noncoffee">
+          <div class="top"><h4>鲜榨橙汁</h4><span class="price">¥26</span></div>
+          <p>每日现榨，不加水不加糖，330ml 玻璃瓶装。</p>
+          <div class="tags"><span class="tag">儿童友好</span></div>
+        </article>
+
+        <article class="item reveal" data-cat="dessert">
+          <div class="top"><h4>肉桂卷</h4><span class="price">¥22</span></div>
+          <p>每天 07:30 与 14:00 两次出炉，手工揉面，肉桂与核桃给得很足。</p>
+          <div class="tags"><span class="tag hot">每日现烤</span></div>
+        </article>
+
+        <article class="item reveal" data-cat="dessert">
+          <div class="top"><h4>伯爵茶巴斯克</h4><span class="price">¥28</span></div>
+          <p>佛手柑茶香入芯，表层焦香浓郁，冷藏后风味更佳。</p>
+          <div class="tags"><span class="tag">人气甜点</span></div>
+        </article>
+
+        <article class="item reveal" data-cat="dessert">
+          <div class="top"><h4>柠檬磅蛋糕</h4><span class="price">¥20</span></div>
+          <p>新鲜柠檬皮屑与糖霜淋面，配美式最合拍。</p>
+          <div class="tags"><span class="tag">配咖啡</span></div>
+        </article>
+
+        <article class="item reveal" data-cat="dessert">
+          <div class="top"><h4>开心果可颂</h4><span class="price">¥26</span></div>
+          <p>27 层黄油酥皮，内馅是西西里开心果酱，周末常常十点前售罄。</p>
+          <div class="tags"><span class="tag hot">限量</span></div>
+        </article>
+
+        <article class="item reveal" data-cat="food">
+          <div class="top"><h4>牛油果全麦吐司</h4><span class="price">¥38</span></div>
+          <p>酸种全麦面包、牛油果泥、溏心蛋与烟熏辣椒粉，配一份时令沙拉。</p>
+          <div class="tags"><span class="tag">早午餐</span><span class="tag">素食可选</span></div>
+        </article>
+
+        <article class="item reveal" data-cat="food">
+          <div class="top"><h4>社区早午餐盘</h4><span class="price">¥52</span></div>
+          <p>炒蛋、烤蘑菇、培根、酸种面包与烤番茄，分量扎实，可两人分享。</p>
+          <div class="tags"><span class="tag hot">周末特供</span><span class="tag">11:00 后供应</span></div>
+        </article>
+
+        <article class="item reveal" data-cat="food">
+          <div class="top"><h4>乡村蘑菇浓汤</h4><span class="price">¥30</span></div>
+          <p>三种菌菇慢炖两小时，配蒜香面包块，天气转凉时每天限量 20 份。</p>
+          <div class="tags"><span class="tag">素食</span></div>
+        </article>
+
+        <article class="item reveal" data-cat="food">
+          <div class="top"><h4>火腿芝士帕尼尼</h4><span class="price">¥36</span></div>
+          <p>恰巴塔压烤，伊比利亚火腿与格鲁耶尔芝士，外脆内融。</p>
+          <div class="tags"><span class="tag">可外带</span></div>
+        </article>
+      </div>
+
+      <div class="menu-note reveal">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="9" stroke="#C2603C" stroke-width="1.8"/><path d="M12 8.2v4.6M12 16.2h.01" stroke="#C2603C" stroke-width="2" stroke-linecap="round"/></svg>
+        <div>
+          <b>关于过敏原：</b>所有产品在同一厨房制作，可能含有麸质、蛋、奶与坚果成分，如有需要请提前告知店员，我们会为你调整。
+          <br><b>外带提示：</b>自带杯 −5 元；纸杯可回收，投入门口的橙色回收箱。
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- VISIT -->
+  <section class="sec" id="visit">
+    <div class="wrap">
+      <div class="visit">
+        <div class="wrap-inner">
+          <div>
+            <span class="eyebrow reveal" style="color:#F0BE79">营业时间 &amp; 地址</span>
+            <h2 class="reveal d1">我们一直在这，<br>等你推门进来。</h2>
+
+            <div class="status reveal d2" id="statusBox">
+              <span class="pulse"></span>
+              <span id="statusText">正在获取当前营业状态…</span>
+            </div>
+
+            <table class="hours reveal d2" id="hoursTable">
+              <thead>
+                <tr><th>星期</th><th style="text-align:right">营业时间</th></tr>
+              </thead>
+              <tbody>
+                <tr data-day="1"><td>周一</td><td>07:30 – 20:00</td></tr>
+                <tr data-day="2"><td>周二</td><td>07:30 – 20:00</td></tr>
+                <tr data-day="3"><td>周三</td><td>07:30 – 21:30</td></tr>
+                <tr data-day="4"><td>周四</td><td>07:30 – 20:00</td></tr>
+                <tr data-day="5"><td>周五</td><td>07:30 – 21:30</td></tr>
+                <tr data-day="6"><td>周六</td><td>08:00 – 21:30</td></tr>
+                <tr data-day="0"><td>周日</td><td>08:30 – 18:00</td></tr>
+              </tbody>
+            </table>
+
+            <p class="reveal d3" style="margin-top:1.45rem;font-size:.92rem">
+              ※ 法定节假日营业时间以门口小黑板与公众号通知为准。厨房打烊前 45 分钟停止点单。<br>
+              ※ 每月最后一个周一下午 14:00–17:00 为设备维护时间，暂停营业。
+            </p>
+          </div>
+
+          <div>
+            <div class="info-card reveal d2">
+              <h4>
+                <svg width="19" height="19" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 21s7-6.1 7-11a7 7 0 1 0-14 0c0 4.9 7 11 7 11Z" stroke="#F0BE79" stroke-width="1.8" stroke-linejoin="round"/><circle cx="12" cy="10" r="2.6" stroke="#F0BE79" stroke-width="1.8"/></svg>
+                地址
+              </h4>
+              <p>
+                上海市徐汇区梧桐里 42 号<br>
+                （近永嘉路 · 地铁 1 / 10 / 12 号线陕西南路站 3 号口，步行 6 分钟）<br>
+                <a class="link" href="https://map.baidu.com" target="_blank" rel="noopener">在地图中打开 →</a>
+              </p>
+            </div>
+
+            <div class="info-card reveal d3">
+              <h4>
+                <svg width="19" height="19" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6.6 4h3l1.4 3.6-2 1.6a12.5 12.5 0 0 0 5.8 5.8l1.6-2 3.6 1.4v3a1.8 1.8 0 0 1-2 1.8C10.4 19.2 4.8 13.6 4.8 6A1.8 1.8 0 0 1 6.6 4Z" stroke="#F0BE79" stroke-width="1.8" stroke-linejoin="round"/></svg>
+                联系我们
+              </h4>
+              <p>
+                电话：<a class="link" href="tel:02158203366">021-5820 3366</a><br>
+                微信公众号：<a class="link" href="#footer">巷口暖屋XKWH</a><br>
+                商务 / 场地合作：<a class="link" href="mailto:hi@xiangkou.coffee">hi@xiangkou.coffee</a>
+              </p>
+            </div>
+
+            <div class="map reveal d3">
+              <svg viewBox="0 0 620 320" role="img" aria-label="巷口暖屋位置示意地图">
+                <rect width="620" height="320" fill="#2B1C14"/>
+                <g stroke="#4B3324" stroke-width="26" stroke-linecap="round">
+                  <path d="M-20 96h660"/><path d="M-20 236h660"/><path d="M148 -20v360"/><path d="M432 -20v360"/>
+                </g>
+                <g stroke="#63422C" stroke-width="12" stroke-linecap="round" opacity=".8">
+                  <path d="M-20 166h660"/><path d="M300 -20v360"/>
+                </g>
+                <g fill="#3A2718" opacity=".9">
+                  <rect x="24" y="118" width="98" height="88" rx="10"/><rect x="182" y="118" width="94" height="88" rx="10"/>
+                  <rect x="336" y="118" width="72" height="88" rx="10"/><rect x="466" y="118" width="126" height="88" rx="10"/>
+                  <rect x="24" y="258" width="98" height="62" rx="10"/><rect x="466" y="258" width="126" height="62" rx="10"/>
+                </g>
+                <g stroke="#E3A65C" stroke-width="3" stroke-dasharray="10 9" fill="none" opacity=".8">
+                  <path d="M60 300c60-40 130-70 190-92s140-38 190-84"/>
+                </g>
+                <circle cx="440" cy="124" r="30" fill="#C2603C" opacity=".28"/>
+                <circle cx="440" cy="124" r="16" fill="#C2603C"/>
+                <circle cx="440" cy="124" r="6" fill="#FFF3E2"/>
+                <g font-family="PingFang SC, Microsoft YaHei, sans-serif" fill="#F6E7D3" font-size="16">
+                  <text x="28" y="82" opacity=".78">永嘉路</text>
+                  <text x="28" y="228" opacity=".78">梧桐里</text>
+                  <text x="164" y="312" opacity=".6">陕西南路</text>
+                </g>
+                <g transform="translate(466,86)">
+                  <rect x="0" y="0" width="140" height="46" rx="12" fill="#FFF3E2"/>
+                  <text x="18" y="29" font-family="Songti SC, serif" font-size="19" font-weight="700" fill="#33231B">巷口暖屋 42 号</text>
+                </g>
+                <circle cx="60" cy="300" r="10" fill="#7C8B62"/>
+                <text x="80" y="306" font-family="PingFang SC, sans-serif" font-size="15" fill="#B8C79C">地铁 3 号口</text>
+              </svg>
+              <div class="map-cap">
+                <span>步行路线：地铁 3 号口出站直行，第二个路口右转即到。</span>
+                <span>导航关键词：梧桐里 42 号</span>
+              </div>
+            </div>
+
+            <div class="route-list reveal d4">
+              <span class="route">🚇 地铁 6 分钟</span>
+              <span class="route">🚌 公交 42 / 45 / 96 路</span>
+              <span class="route">🚲 门口共享单车停放点</span>
+              <span class="route">🚗 附近停车场：永嘉路 P2</span>
+              <span class="route">🐾 宠物友好（请系牵引绳）</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- EVENTS -->
+  <section class="sec" id="events">
+    <div class="wrap">
+      <div class="sec-head">
+        <div>
+          <span class="eyebrow reveal">社区日历</span>
+          <h2 class="reveal d1">店里的每一次<br>热闹都有名字</h2>
+        </div>
+        <p class="reveal d2">
+          除了咖啡，我们更想做一件小事：让住在这里的人彼此认识。所有活动免费参加，
+          消费任意一杯饮品即可入座，名额有限，先到先得。
+        </p>
+      </div>
+
+      <div class="events-grid">
+        <article class="event reveal">
+          <span class="num">01</span>
+          <span class="when">每周三 · 19:30</span>
+          <h3>巷口读书会</h3>
+          <p>带上最近在读的那本书，围坐在二楼的长桌旁，聊二十分钟。没有领读人，也不必读完。</p>
+        </article>
+
+        <article class="event reveal d1">
+          <span class="num">02</span>
+          <span class="when">每周六 · 10:00</span>
+          <h3>手冲入门课</h3>
+          <p>四人小班，从磨豆粗细讲到注水节奏，学会给自己冲一杯稳定的咖啡。含豆子与器具。</p>
+        </article>
+
+        <article class="event reveal d2">
+          <span class="num">03</span>
+          <span class="when">每月首个周日</span>
+          <h3>邻里二手书角</h3>
+          <p>拿一本、换一本。所有书款的 10% 捐给社区图书角，为孩子们添置新书。</p>
+        </article>
+
+        <article class="event reveal d3">
+          <span class="num">04</span>
+          <span class="when">每月最后一个周五</span>
+          <h3>店主的晚餐桌</h3>
+          <p>十人份的家常菜，菜单随季节与心情。报名请到吧台留言或电话预约。</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- VOICES -->
+  <section class="sec">
+    <div class="wrap">
+      <div class="voices">
+        <div style="text-align:center;max-width:640px;margin:0 auto">
+          <span class="eyebrow reveal" style="justify-content:center">邻居们说</span>
+          <h2 class="reveal d1" style="margin-top:.9rem">来自留言本第七册</h2>
+          <p class="reveal d2" style="margin-top:1rem">
+            店里那本牛皮纸封面的留言本，已经写到第七册了。以下是其中几则被我们偷偷抄下来的句子。
+          </p>
+        </div>
+
+        <div class="voice-grid">
+          <div class="voice reveal">
+            <div class="stars" aria-label="五星好评">★★★★★</div>
+            <p>「搬到这条街三年，几乎每周都来。店员记得我不加糖、记得我家狗叫豆豆。这种被记住的感觉很难得。」</p>
+            <div class="who">
+              <span class="avatar" style="background:#C2603C">林</span>
+              <span><b>林小姐</b><small>住在隔壁弄堂</small></span>
+            </div>
+          </div>
+
+          <div class="voice reveal d1">
+            <div class="stars" aria-label="五星好评">★★★★★</div>
+            <p>「在这儿改完了整本论文。插座位很够，WiFi 稳，晚上八点还有人给端上一杯热水，说『辛苦了』。」</p>
+            <div class="who">
+              <span class="avatar" style="background:#7C8B62">阿</span>
+              <span><b>阿澈</b><small>研究生 · 常驻窗边</small></span>
+            </div>
+          </div>
+
+          <div class="voice reveal d2">
+            <div class="stars" aria-label="五星好评">★★★★★</div>
+            <p>「手冲课上完之后，我家的挂耳终于不苦了。老师讲得特别细，还把笔记发给我们。」</p>
+            <div class="who">
+              <span class="avatar" style="background:#D08A45">周</span>
+              <span><b>周先生</b><small>周六手冲课学员</small></span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="sec" style="padding-top:0">
+    <div class="wrap">
+      <div class="cta reveal">
+        <h2>今天，也给你留了<br>靠窗的那个位置。</h2>
+        <p>无论是清晨的第一杯，还是深夜的最后一页，巷口暖屋都在梧桐里 42 号，等你推门。</p>
+        <div class="cta-actions">
+          <a href="#menu" class="btn btn-primary">看看今日菜单</a>
+          <a href="tel:02158203366" class="btn btn-ghost">电话预约座位</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer id="footer">
+  <div class="wrap">
+    <div class="foot-grid">
+      <div>
+        <a href="#top" class="brand" style="margin-bottom:1.15rem">
+          <span class="mark" aria-hidden="true">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+              <path d="M4.2 8.4h11.2v4.6a5.6 5.6 0 0 1-5.6 5.6 5.6 5.6 0 0 1-5.6-5.6V8.4Z" fill="#FFF3E2"/>
+              <path d="M15.6 9.6h1.7a2.5 2.5 0 0 1 0 5h-.9" stroke="#FFF3E2" stroke-width="1.7" stroke-linecap="round"/>
+              <path d="M8 5.4c.9-.9.9-1.7 0-2.6M11.4 5.4c.9-.9.9-1.7 0-2.6" stroke="#FFF3E2" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+          </span>
+          <span>巷口暖屋<small>XIANGKOU COFFEE</small></span>
+        </a>
+        <p style="color:rgba(246,231,211,.7);font-size:.93rem;max-width:34ch">
+          一家开在梧桐树下的社区咖啡馆。自 2013 年起，把豆子烘好，把人等来。
+        </p>
+      </div>
+
+      <div>
+        <h4>逛逛这里</h4>
+        <div class="foot-links">
+          <a href="#story">品牌故事</a>
+          <a href="#menu">当季菜单</a>
+          <a href="#visit">营业时间</a>
+          <a href="#visit">地址与交通</a>
+          <a href="#events">社区活动</a>
+        </div>
+      </div>
+
+      <div>
+        <h4>联系我们</h4>
+        <div class="foot-links">
+          <a href="tel:02158203366">021-5820 3366</a>
+          <a href="mailto:hi@xiangkou.coffee">hi@xiangkou.coffee</a>
+          <a href="#visit">上海 · 梧桐里 42 号</a>
+          <a href="#footer">微信公众号：巷口暖屋XKWH</a>
+          <a href="#footer">小红书 @巷口暖屋</a>
+        </div>
+      </div>
+
+      <div>
+        <h4>每周豆单订阅</h4>
+        <p style="color:rgba(246,231,211,.7);font-size:.92rem">
+          留下邮箱，我们每周三把新豆与活动预告寄给你。不发广告，只聊咖啡。
+        </p>
+        <form class="subscribe" id="subForm" novalidate>
+          <input type="email" id="subEmail" placeholder="你的邮箱地址" aria-label="邮箱地址" required>
+          <button type="submit">订阅</button>
+        </form>
+        <div class="msg" id="subMsg" role="status"></div>
+      </div>
+    </div>
+
+    <div class="foot-bottom">
+      <span>© 2025 巷口暖屋社区咖啡馆 · 沪ICP备 12345678 号</span>
+      <span>营业时间：周一至周五 07:30–20:00 · 周六 08:00–21:30 · 周日 08:30–18:00</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+(function(){
+  /* ---- sticky nav ---- */
+  const nav = document.getElementById('nav');
+  const onScroll = () => nav.classList.toggle('stuck', window.scrollY > 12);
+  onScroll();
+  window.addEventListener('scroll', onScroll, {passive:true});
+
+  /* ---- mobile menu ---- */
+  const toggle = document.getElementById('navToggle');
+  const links = document.getElementById('navLinks');
+  toggle.addEventListener('click', () => {
+    const open = links.classList.toggle('open');
+    toggle.classList.toggle('open', open);
+    toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+  });
+  links.querySelectorAll('a').forEach(a => a.addEventListener('click', () => {
+    links.classList.remove('open');
+    toggle.classList.remove('open');
+    toggle.setAttribute('aria-expanded','false');
+  }));
+
+  /* ---- reveal on scroll ---- */
+  const reveals = document.querySelectorAll('.reveal');
+  if ('IntersectionObserver' in window) {
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); }
+      });
+    }, {threshold:.12, rootMargin:'0px 0px -8% 0px'});
+    reveals.forEach(el => io.observe(el));
+  } else {
+    reveals.forEach(el => el.classList.add('in'));
+  }
+
+  /* ---- menu filter ---- */
+  const tabs = document.querySelectorAll('.tab');
+  const items = document.querySelectorAll('#menuGrid .item');
+  tabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      tabs.forEach(t => { t.classList.remove('active'); t.setAttribute('aria-selected','false'); });
+      tab.classList.add('active');
+      tab.setAttribute('aria-selected','true');
+      const f = tab.dataset.filter;
+      items.forEach((item, i) => {
+        const show = f === 'all' || item.dataset.cat === f;
+        if (show) {
+          item.style.display = '';
+          item.style.opacity = '0';
+          item.style.transform = 'translateY(14px)';
+          setTimeout(() => {
+            item.style.opacity = '1';
+            item.style.transform = 'none';
+          }, 30 + i * 35);
+        } else {
+          item.style.display = 'none';
+        }
+      });
+    });
+  });
+
+  /* ---- opening hours status ---- */
+  // index: 0 = Sunday ... 6 = Saturday ; [openHour, closeHour] in decimal hours
+  const schedule = {
+    0:[8.5,18], 1:[7.5,20], 2:[7.5,20], 3:[7.5,21.5],
+    4:[7.5,20], 5:[7.5,21.5], 6:[8,21.5]
+  };
+  const dayNames = ['周日','周一','周二','周三','周四','周五','周六'];
+  const fmt = (h) => {
+    const hh = Math.floor(h);
+    const mm = Math.round((h - hh) * 60);
+    return String(hh).padStart(2,'0') + ':' + String(mm).padStart(2,'0');
+  };
+
+  function updateStatus(){
+    const now = new Date();
+    const d = now.getDay();
+    const cur = now.getHours() + now.getMinutes()/60;
+    const today = schedule[d];
+    const box = document.getElementById('statusBox');
+    const text = document.getElementById('statusText');
+
+    // highlight today's row
+    document.querySelectorAll('#hoursTable tbody tr').forEach(tr => {
+      tr.classList.toggle('today', Number(tr.dataset.day) === d);
+    });
+
+    if (cur >= today[0] && cur < today[1]) {
+      box.classList.remove('closed');
+      text.textContent = '现在营业中 · 今天开到 ' + fmt(today[1]) + '，欢迎来坐坐';
+    } else {
+      box.classList.add('closed');
+      let msg;
+      if (cur < today[0]) {
+        msg = '还没开门 · 今天 ' + fmt(today[0]) + ' 开始营业';
+      } else {
+        let next = d, offset = 0;
+        do { next = (next + 1) % 7; offset++; } while (schedule[next][0] === undefined);
+        msg = '今天已打烊 · ' + (offset === 1 ? '明天' : dayNames[next]) + ' ' + fmt(schedule[next][0]) + ' 再见';
+      }
+      text.textContent = msg;
+    }
+  }
+  updateStatus();
+  setInterval(updateStatus, 60000);
+
+  /* ---- newsletter ---- */
+  const form = document.getElementById('subForm');
+  const email = document.getElementById('subEmail');
+  const msg = document.getElementById('subMsg');
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const v = email.value.trim();
+    const ok = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
+    if (!ok) {
+      msg.style.color = '#F0BE79';
+      msg.textContent = '请填写正确的邮箱地址，我们才好把豆单寄给你 ☕';
+      email.focus();
+      return;
+    }
+    msg.style.color = '#C6E3A2';
+    msg.textContent = '订阅成功！本周三的豆单会准时抵达 ' + v;
+    email.value = '';
+  });
+
+  /* ---- smooth anchor offset for sticky header ---- */
+  document.querySelectorAll('a[href^="#"]').forEach(a => {
+    a.addEventListener('click', (e) => {
+      const id = a.getAttribute('href');
+      if (id.length < 2) return;
+      const target = document.querySelector(id);
+      if (!target) return;
+      e.preventDefault();
+      const top = target.getBoundingClientRect().top + window.scrollY - 78;
+      window.scrollTo({top, behavior:'smooth'});
+    });
+  });
+})();
+</script>
+</body>
+</html>
