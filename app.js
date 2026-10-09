@@ -38,7 +38,18 @@
     }
     let r;
     try { r = await fetch(path, o); }
-    catch (e) { return { ok: false, status: 0, data: { error: "连不上本地服务，请确认 server.js 已启动" } }; }
+    catch (e) {
+      const host = location.hostname;
+      let msg;
+      if (location.protocol === "file:") {
+        msg = "你是直接双击打开的 index.html（file://），此时没有后端，无法登录。请关闭本页，双击「一键启动.bat」启动服务，或浏览器访问 http://localhost:8137";
+      } else if (host === "localhost" || host === "127.0.0.1") {
+        msg = "连不上本地服务，请确认 server.js 已启动（双击「一键启动.bat」，或访问 http://localhost:8137）";
+      } else {
+        msg = "网络异常，请求失败，请刷新页面重试";
+      }
+      return { ok: false, status: 0, data: { error: msg } };
+    }
     const txt = await r.text();
     let data = null;
     try { data = JSON.parse(txt); } catch (e) { data = { raw: txt }; }
@@ -1162,6 +1173,10 @@
       return;
     }
     // 纯静态打开（没有本地服务）：游客模式
+    if (location.protocol === "file:") {
+      const foot = $("#authFoot");
+      if (foot) foot.innerHTML = "⚠️ 当前是<b>直接双击打开</b>的页面，登录/注册不可用。请关闭后双击「一键启动.bat」启动服务再登录。";
+    }
     enterGuest();
     if (restoreLast()) {
       addMsg("bot", "已恢复你上次的项目（数据存在本地，关掉浏览器再回来依然在）。");
