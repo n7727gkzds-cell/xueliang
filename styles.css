@@ -56,11 +56,26 @@ body[data-theme="light"]{
     radial-gradient(900px 500px at 100% 0%, rgba(34,211,238,.08), transparent 55%),
     var(--bg);
 }
-body::before,body::after{content:"";position:fixed;border-radius:50%;filter:blur(90px);z-index:-1;pointer-events:none;opacity:.55}
+body::before,body::after{content:"";position:fixed;border-radius:50%;filter:blur(90px);z-index:-1;pointer-events:none;opacity:.55;
+  will-change:transform;transform:translate3d(0,0,0);backface-visibility:hidden;contain:strict}
 body::before{width:480px;height:480px;background:radial-gradient(circle,rgba(124,92,255,.40),transparent 70%);top:-170px;left:-130px;animation:drift1 19s ease-in-out infinite}
 body::after{width:430px;height:430px;background:radial-gradient(circle,rgba(34,211,238,.30),transparent 70%);bottom:-170px;right:-110px;animation:drift2 23s ease-in-out infinite}
-@keyframes drift1{0%,100%{transform:translate(0,0)}50%{transform:translate(70px,46px)}}
-@keyframes drift2{0%,100%{transform:translate(0,0)}50%{transform:translate(-56px,-34px)}}
+@keyframes drift1{0%,100%{transform:translate3d(0,0,0)}50%{transform:translate3d(70px,46px,0)}}
+@keyframes drift2{0%,100%{transform:translate3d(0,0,0)}50%{transform:translate3d(-56px,-34px,0)}}
+/* 弱化动态：远程桌面 / 低端设备 / 系统开启"减少动态"时关掉大面积模糊光斑与常驻动画，
+   远程视频流编码跟不上逐帧高斯模糊会导致整屏闪烁。 */
+@media (prefers-reduced-motion:reduce){
+  body::before,body::after{animation:none !important;filter:blur(60px)}
+  .empty-glow{animation:none !important}
+  .typing i{animation-duration:2.4s}
+}
+html.remote-safe body::before,html.remote-safe body::after{animation:none !important;filter:blur(56px)}
+html.remote-safe .empty-glow{animation:none !important}
+/* backdrop-filter 需要每帧读取并模糊背后画面，远程视频流下同样会引发闪烁，降级为不透明底色 */
+html.remote-safe .topbar,html.remote-safe .mobile-bar{backdrop-filter:none !important;background:var(--panel) !important}
+html.remote-safe .modal{backdrop-filter:none !important;background:rgba(5,7,15,.86) !important}
+html.remote-safe .dot.live{animation:none !important}
+html.remote-safe .send-btn.busy{animation:none !important;opacity:.75}
 .code-body .tk-tag{color:#c792ea}
 .code-body .tk-attr{color:#82aaff}
 .code-body .tk-str{color:#c3e88a}

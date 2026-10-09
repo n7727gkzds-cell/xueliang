@@ -4,6 +4,41 @@
 (function () {
   "use strict";
 
+  /* ============================================================
+     降载模式：远程桌面 / 低端设备上自动关闭大面积模糊与常驻动画。
+     原因：filter:blur() 和 backdrop-filter 是逐像素运算，本机 GPU 能跑满，
+     但远程桌面要把画面逐帧编码成视频流传输，合成速度跟不上编码就会整屏闪烁。
+     ============================================================ */
+  function enableLiteMode(reason) {
+    document.documentElement.classList.add("remote-safe");
+    try { localStorage.setItem("forgeLite", "1"); } catch (e) {}
+    console.info("[Forge] 已启用降载模式：" + reason);
+  }
+  (function initLiteMode() {
+    let forced = null;
+    try { forced = new URLSearchParams(location.search).get("lite"); } catch (e) {}
+    if (forced === "1") { enableLiteMode("URL 参数 ?lite=1"); return; }
+    if (forced === "0") return;
+    try { if (localStorage.getItem("forgeLite") === "1") {
+      document.documentElement.classList.add("remote-safe"); return; } } catch (e) {}
+    // 系统已开启"减少动态效果"
+    try {
+      if (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+        document.documentElement.classList.add("remote-safe"); return; }
+    } catch (e) {}
+    // 远程桌面特征：Windows 远程会话标记
+    try {
+      var remote = /Remote Desktop|RDP|SessionId/i.test(navigator.userAgent) ||
+                   (navigator.userAgent.indexOf("Windows") >= 0 && /RDP/i.test(navigator.userAgent));
+      if (remote) { enableLiteMode("检测到远程桌面环境"); return; }
+    } catch (e) {}
+    // 硬件并发低（老设备 / 虚拟机）也降一档
+    try {
+      if (navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 2) {
+        enableLiteMode("设备核心数较少"); return; }
+    } catch (e) {}
+  })();
+
   const $ = (s) => document.querySelector(s);
   const thread = $("#thread");
   const empty = $("#empty");
