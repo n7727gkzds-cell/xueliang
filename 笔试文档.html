@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ROOT 全栈岗位笔试 · 李学良</title>
+<style>
+  :root{
+    --ink:#1a2030; --sub:#5a6486; --faint:#8b94ad;
+    --line:#e6e9f2; --line2:#d8dced;
+    --bg:#f7f8fc; --card:#fff;
+    --brand:#6d5cff; --brand2:#22d3ee;
+  }
+  *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
+    line-height:1.78;font-size:15.5px;
+    background-image:radial-gradient(900px 420px at 8% -8%, rgba(109,92,255,.10), transparent 60%),
+                     radial-gradient(760px 380px at 100% 0%, rgba(34,211,238,.10), transparent 58%);}
+  .wrap{max-width:900px;margin:0 auto;padding:46px 26px 76px}
+  header{margin-bottom:32px}
+  .kicker{display:inline-block;font-size:12px;letter-spacing:.12em;color:var(--brand);
+    background:rgba(109,92,255,.09);border:1px solid rgba(109,92,255,.22);padding:4px 12px;border-radius:999px;margin-bottom:14px}
+  h1{font-size:33px;line-height:1.25;margin:0 0 8px;letter-spacing:-.5px}
+  .byline{color:var(--faint);font-size:14px;margin:0}
+
+  h2{font-size:21px;margin:46px 0 14px;padding-top:22px;border-top:1px solid var(--line)}
+  h2:first-of-type{border-top:none;padding-top:0}
+  h3{font-size:16px;margin:28px 0 10px;color:var(--ink)}
+  p{margin:0 0 13px}
+  ul{padding-left:22px;margin:8px 0 16px}
+  li{margin-bottom:7px}
+  strong{font-weight:650}
+  code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:13.5px;
+    background:#f0f2f9;border:1px solid var(--line);padding:1px 6px;border-radius:5px;
+    word-break:break-word}
+  a{color:var(--brand);text-decoration:none;word-break:break-all}
+  a:hover{text-decoration:underline}
+
+  /* 提交信息卡 */
+  .meta{background:linear-gradient(135deg,#fff,#fbfbff);border:1px solid var(--line);
+    border-left:3px solid var(--brand);border-radius:14px;padding:18px 20px;margin:24px 0 8px;
+    box-shadow:0 6px 22px rgba(26,32,48,.05)}
+  .meta dl{margin:0;display:grid;grid-template-columns:auto 1fr;gap:9px 16px;align-items:baseline}
+  .meta dt{color:var(--sub);font-size:13.5px;white-space:nowrap}
+  .meta dd{margin:0;font-size:14px;min-width:0}
+
+  /* 小节标题：加粗首句独立成行 */
+  .lead{background:var(--card);border:1px solid var(--line);border-radius:12px;
+    padding:16px 18px;margin:14px 0;box-shadow:0 4px 16px rgba(26,32,48,.04)}
+  .lead b{display:block;margin-bottom:6px;color:var(--ink);font-size:15.5px}
+  .lead p{margin:0;color:#3d465e}
+
+  .note{background:#fffaf0;border:1px solid #f3e3c0;border-radius:12px;padding:14px 16px;
+    font-size:13.5px;color:#7a5b16;margin:16px 0}
+
+  /* 回收通道清单 */
+  .deliver{background:var(--card);border:1px solid var(--line);border-radius:14px;
+    padding:6px 20px;margin:14px 0 8px;box-shadow:0 4px 16px rgba(26,32,48,.04)}
+  .deliver ul{padding-left:20px;margin:14px 0}
+  .req{color:var(--brand);font-weight:650}
+  .opt{color:var(--faint)}
+
+  footer{margin-top:50px;padding-top:20px;border-top:1px solid var(--line);color:var(--faint);font-size:12.5px}
+  .tools{position:fixed;top:14px;right:14px;display:flex;gap:8px}
+  .tools button{font:inherit;font-size:12.5px;color:var(--sub);background:var(--card);
+    border:1px solid var(--line2);border-radius:9px;padding:7px 13px;cursor:pointer;
+    box-shadow:0 3px 12px rgba(26,32,48,.07)}
+  .tools button:hover{border-color:var(--brand);color:var(--brand)}
+
+  @media (prefers-color-scheme:dark){
+    :root{--ink:#e8ebf5; --sub:#a3acc6; --faint:#7a839e;
+      --line:#262b3a; --line2:#333a4d; --bg:#12151f; --card:#1a1e2b}
+    body{background-image:radial-gradient(900px 420px at 8% -8%, rgba(109,92,255,.14), transparent 60%),
+                       radial-gradient(760px 380px at 100% 0%, rgba(34,211,238,.12), transparent 58%)}
+    .meta,.lead,.deliver{background:linear-gradient(135deg,#1a1e2b,#1d2231)}
+    .lead p{color:#c2c9dc}
+    code{background:#222736;border-color:#333a4d;color:#cdd4e8}
+    .note{background:#241f10;border-color:#4a3d1c;color:#e0c489}
+    .tools button{background:#1a1e2b}
+  }
+  @media print{
+    body{background:#fff;background-image:none;font-size:11.5pt;line-height:1.7}
+    .wrap{max-width:none;padding:0}
+    .tools{display:none}
+    .meta,.lead,.deliver{box-shadow:none;break-inside:avoid}
+    h2{break-after:avoid;margin-top:26px;padding-top:16px}
+    h3{break-after:avoid}
+    li{break-inside:avoid}
+    a{color:var(--ink);text-decoration:none}
+    code{border-color:#ccc}
+    @page{margin:16mm}
+  }
+  @media(max-width:620px){
+    .wrap{padding:28px 16px 56px}
+    h1{font-size:25px}
+    h2{font-size:19px}
+    .meta dl{grid-template-columns:1fr;gap:2px 0}
+    .meta dt{margin-top:8px}
+  }
+</style>
+</head>
+<body>
+<div class="tools">
+  <button onclick="window.print()">打印 / 存为 PDF</button>
+</div>
+
+<div class="wrap">
+
+<header>
+  <span class="kicker">ROOT 全栈岗位笔试</span>
+  <h1>对话式应用生成工具 Forge</h1>
+  <p class="byline">李学良</p>
+</header>
+
+<div class="meta">
+  <dl>
+    <dt>在线链接</dt>
+    <dd><a href="https://forge-ai-app-studio.app.workbuddy.host/">https://forge-ai-app-studio.app.workbuddy.host/</a></dd>
+    <dt>代码仓库</dt>
+    <dd><a href="https://github.com/n7727gkzds-cell/xueliang">https://github.com/n7727gkzds-cell/xueliang</a>（public）</dd>
+    <dt>测试账号</dt>
+    <dd><code>demo@forge.app</code> / <code>demo1234</code>，登录页有「一键填入」，也可自己注册</dd>
+  </dl>
+</div>
+
+<h2>1. 挑战内容</h2>
+
+<p>我做的是 Forge，一个对话式的应用生成工具。一句话描述想要什么，它拆解需求、生成一个完整可用的网页，右侧实时预览，可以继续对话改，满意了发布成一个网址。</p>
+
+<p>动手前我把 Atoms 的帮助文档读了一遍，把里面的产品要求整理成清单：项目简报、参考附件、先定一个小目标、给出具体改进建议、发布和更新线上版本。后面开发基本照着这份清单逐个落地。</p>
+
+<h3>几个核心点</h3>
+
+<ul>
+  <li>生成由四个智能体协作完成，规划、设计、构建、评审各管一段，每个角色的输出实时打在对话里，过程看得见。</li>
+  <li>预览边生成边渲染，代码流出多少就渲染多少，不白屏干等。</li>
+  <li>默认走内置本地引擎，内置 8 类应用模板，零配置就能演示，任何时候打开都有东西看，不会停在报错页。也支持接 OpenAI 兼容的云端模型（MiMo 等），经本地 Node 代理转发、密钥不落前端；本演示版默认关闭，需要时改一个开关就能开。</li>
+  <li>要先登录才能进工作台，可以自己注册，也可以用测试账号直接进。登录后项目简报、每个版本的代码、发布记录都存在服务端，换台电脑登录还能接着改；不登录也能用，数据留在本机浏览器。</li>
+</ul>
+
+<p>开发用 WorkBuddy（AI 编程 Agent）协作完成，写完用 Playwright 加真实 Chromium 跑了 34 项端到端检查，全部通过，0 控制台错误。</p>
+
+<h2>2. 提交方式</h2>
+
+<p>以下是简要说明文档。</p>
+
+<h3>实现思路与关键取舍</h3>
+
+<div class="lead">
+  <b>模型接入走本地代理，没让浏览器直连</b>
+  <p>直连有两个绕不开的问题：CORS 会拦，API Key 也容易暴露在前端请求里。所以加了一个本地 Node 代理，Key 只存在浏览器 localStorage 里，请求经代理转发。协议统一用 OpenAI 兼容格式加 SSE 流式，换厂商不用改代码。</p>
+</div>
+
+<div class="lead">
+  <b>做了本地引擎兜底</b>
+  <p>评估的人不一定配 Key，网络也可能出问题，所以内置了规则引擎，按意图套模板生成完整页面。模型调不通就自动切过去，演示不中断。</p>
+</div>
+
+<div class="lead">
+  <b>发布改成了真实可访问的地址</b>
+  <p>上一版生成的地址换个浏览器就打不开，这版让服务端把当前版本写成静态页面，返回 <code>/p/&lt;slug&gt;</code>，任何人打开都能看到。再点一次发布就是更新线上版本，地址不变。</p>
+</div>
+
+<div class="lead">
+  <b>数据持久化做了两层</b>
+  <p>登录后项目简报、每个版本的代码、发布记录都存服务端，每个用户一个 JSON 文件，换台电脑接着改；不登录退回本机 localStorage，功能照常跑。密码用 scrypt 加盐哈希，登录态是 HttpOnly cookie。没引数据库是因为这个体量文件存就够了，部署也省事。</p>
+</div>
+
+<div class="lead">
+  <b>版本管理是后补的</b>
+  <p>最初只有生成和预览，对照 Atoms「更新线上版本」的要求加了版本历史。发现光能回滚还不够、改了什么看不出来，又加了行级 diff：选两个版本能看到新增删除了哪些行；代码面板里也能直接改代码，改完存成新版本。</p>
+</div>
+
+<div class="lead">
+  <b>迭代要看得见变化</b>
+  <p>第一版里点「让营业时间更醒目好找」，新旧版本代码一模一样，等于白改。后来给本地引擎补了微调规则，这类意见现在会真的改动 HTML，并且明确告诉你改了哪几处。</p>
+</div>
+
+<h3>测试时才发现的几个问题</h3>
+
+<p>这几个都是跑端到端验证时暴露出来的，本地开发阶段不会碰到。</p>
+
+<div class="lead">
+  <b>点不同推荐入口，生成的页面结构完全相同，只有配色不同</b>
+  <p>原因是生成过一次之后，之后所有输入都被当成迭代请求，而迭代会继承上一版的模板类型。修法是加了一层意图判定：先识别微调信号（标题、字号、颜色、改成、加上这类），命中就判为迭代；只有句子里真的出现了另一类应用的关键词（看板、商城、博客、作品集），才判为换一个应用重新生成。判定逻辑单独跑了 13 条用例，又连点四个入口核对结构确实不同，同时回归确认「标题再大一点」不会误触发。</p>
+</div>
+
+<div class="lead">
+  <b>远程桌面上整页一直闪，本机打开完全正常</b>
+  <p>先排除了代码问题，布局抖动为 0、文档高度恒定、没有自发请求。真正原因是背景那两团装饰光斑：直径近千像素、90px 模糊、固定在屏幕上做 19 秒和 23 秒的无限循环漂移。模糊是逐像素运算，本机 GPU 能跑满 60 帧，但远程桌面要把画面逐帧压缩成视频流传过去，合成追不上编码就闪了。现在检测到远程桌面会话、系统开了「减少动态效果」、或者设备核心数很少时会自动降载，关掉大面积模糊和常驻动画，毛玻璃也换成不透明底色；也支持网址后加 <code>?lite=1</code> 强制开启。光斑只是不漂移，视觉上基本看不出差别。</p>
+</div>
+
+<div class="lead">
+  <b>线上同步一直显示失败</b>
+  <p>抓包发现读取正常，只有写入被拦，返回的不是自己的接口错误而是云平台的「WAF 拦截页面」。逐项对比后定位到触发条件：只要请求体里出现 <code>&lt;script&gt;</code> 这个字面量就被判定成 XSS 注入拦掉，而生成的页面本来就带 <code>&lt;script&gt;</code>，所以同步必然失败；把同样内容全部转义成纯文本照样被拦，说明匹配的是这个标签模式本身，不是脚本内容。解法是把请求体统一 base64 编码再发，服务端识别标记后解码。这个问题只在部署后被别人访问时才暴露，本地开发测不出来。</p>
+</div>
+
+<h3>当前完成程度</h3>
+
+<p><strong>功能上完成的</strong></p>
+
+<ul>
+  <li>注册、登录、退出，密码加盐哈希，登录态 HttpOnly cookie，自带测试账号</li>
+  <li>服务端数据持久化，换设备可续；不登录时降级存本机</li>
+  <li>发布生成真实可访问的 <code>/p/&lt;slug&gt;</code> 地址，再发布即更新线上版本</li>
+  <li>四智能体协作生成，每个带可展开的结构化产出物和耗时</li>
+  <li>流式实时预览，桌面、平板、手机三档设备框</li>
+  <li>工作台自身也做了响应式：平板上下分栏，手机上对话和预览全屏切换，登录页在手机上铺满整屏</li>
+  <li>代码面板支持查看、直接编辑（存为新版本）、版本间行级 diff</li>
+  <li>版本历史：回滚、改名、对比</li>
+  <li>无后端也能登录：file:// 或离线打开时启用纯前端本机账号，发给别人、别人电脑打开同样能注册登录使用</li>
+  <li>能分清「换一个应用」和「改当前应用」，新需求换模板重新生成，微调意见走增量修改</li>
+  <li>远程桌面和弱设备下自动降载，演示时不再闪屏</li>
+  <li>演示状态已预置：测试账号里放好了生成好的应用和版本历史，登录后直接看到成品、已发布地址和可回滚的历史版本</li>
+  <li>项目简报、图片附件作为设计参考（模型不支持时自动降级为纯文字）</li>
+  <li>端到端 34 项检查全部通过，0 控制台错误</li>
+</ul>
+
+<p><strong>没做、或者只做了一半的</strong></p>
+
+<ul>
+  <li>产物还是单文件 HTML，没有工程化拆分，在线编辑也是改整份代码，不是组件级</li>
+  <li>智能体是编排出来的叙述流程，没接真正的 Agent 框架做工具调用</li>
+  <li>发布页没有权限控制，拿到链接的人都能看，也没有自定义域名</li>
+  <li>账号是文件存储，量大了得换数据库，还要补邮箱验证和找回密码</li>
+</ul>
+
+<h3>如果继续投入</h3>
+
+<p>先做产物工程化。单文件演示够用，但真要迭代一个复杂应用代码会膨胀到难维护。拆成多文件结构，编辑粒度降到组件级，同时对生成质量加约束，比如按组件输出、每次只改受影响的部分。</p>
+
+<p>然后是账号体系。现在文件存储够用但不正规，换成数据库，补上邮箱验证和找回密码，再加发布页的访问权限（私有链接、有效期、访问统计）。</p>
+
+<p>再往后是让评审智能体真正干活：自动截图对比、检查移动端适配和可访问性，给出能执行的修改意见，而不是现在这种基于规则的建议。</p>
+
+<p>多人协作放最后。评论、协同编辑这些在单机场景下收益最小，前面几步不做完它也做不起来。</p>
+
+<h2>3. 笔试结果回收通道</h2>
+
+<div class="deliver">
+  <ul>
+    <li><span class="req">必含</span>　笔试文档：本文档</li>
+    <li><span class="req">必含</span>　已部署的可测试链接：<a href="https://forge-ai-app-studio.app.workbuddy.host/">https://forge-ai-app-studio.app.workbuddy.host/</a></li>
+    <li><span class="req">必含</span>　代码链接（GitHub，public）：<a href="https://github.com/n7727gkzds-cell/xueliang">https://github.com/n7727gkzds-cell/xueliang</a></li>
+    <li><span class="opt">附</span>　示例产出：<code>示例产出-社区咖啡馆.html</code></li>
+    <li><span class="opt">附</span>　演示截图：<code>演示截图-手机登录页.png</code> / <code>演示截图-手机生成后.png</code> / <code>演示截图-手机预览.png</code> / <code>演示截图-平板.png</code></li>
+  </ul>
+</div>
+
+<footer>李学良 · ROOT 全栈岗位笔试 · 2026</footer>
+
+</div>
+</body>
+</html>
