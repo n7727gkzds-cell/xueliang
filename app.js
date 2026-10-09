@@ -1083,7 +1083,13 @@
     const v = promptEl.value.trim();
     if (!v || busy) return;
     promptEl.value = ""; promptEl.style.height = "auto";
-    run(v, !!lastMeta);
+    // 语义判断：这句话是想换一个全新的应用，还是在改当前这个
+    let isRefine;
+    try { isRefine = !Forge.isNewAppIntent(v, lastMeta); }
+    catch (e) { isRefine = !!lastMeta; }
+    if (isRefine && !lastMeta) isRefine = false;
+    if (!isRefine) { lastMeta = null; lastHTML = ""; }
+    run(v, isRefine);
   }
   sendBtn.addEventListener("click", () => {
     if (busy && currentAbort) { currentAbort.abort(new Error("手动中断")); return; }
@@ -1096,10 +1102,12 @@
     promptEl.style.height = "auto";
     promptEl.style.height = Math.min(promptEl.scrollHeight, 120) + "px";
   });
-  document.querySelectorAll(".chip").forEach((c) =>
+  document.querySelectorAll(".chip, .ex-card").forEach((c) =>
     c.addEventListener("click", () => {
       if (busy) return;
       promptEl.value = c.dataset.q;
+      // 推荐入口一定是「新应用」，不做增量迭代
+      lastMeta = null; lastHTML = "";
       submit();
     })
   );
@@ -1175,23 +1183,28 @@
     $("#pubTitle").textContent = title;
     $("#pubVer").textContent = "v" + published.v;
     $("#pubNote").textContent = note;
-    $("#liveUrl").value = published.url;
+    $("#liveUrl").value = absPubUrl(published) || published.url || "";
     $("#publishModal").hidden = false;
     updateVerBadge();
     persistLast();
     toast(note === "当前已是最新版本" ? "线上已是最新版本" : "已发布 v" + published.v);
   });
+  /* 相对路径的发布地址转绝对地址（本地 / 线上环境都正确） */
+  function absPubUrl(p) {
+    if (!p || !p.url) return "";
+    try { return new URL(p.url, location.origin).href; } catch (e) { return p.url; }
+  }
+
   $("#copyUrl").addEventListener("click", () => {
     const inp = $("#liveUrl");
+    inp.value = absPubUrl(published);
     inp.select();
     try { navigator.clipboard.writeText(inp.value); } catch (e) { document.execCommand("copy"); }
     toast("链接已复制");
   });
   $("#openUrl").addEventListener("click", () => {
-    if (published && published.url && published.url.indexOf("http") === 0) {
-      window.open(published.url, "_blank");
-      return;
-    }
+    const u = absPubUrl(published);
+    if (u) { window.open(u, "_blank"); return; }
     const w = window.open();
     if (w) w.document.write(lastHTML);
   });

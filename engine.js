@@ -327,6 +327,40 @@ footer{text-align:center;padding:40px 0;color:var(--sub);font-size:13px;border-t
   };
 
   /* ---------- 4. public generate ---------- */
+  /* 各类应用的"强类型词"：只有句子里真的出现了这些词，才可能是想换一个应用。
+     颜色、字号、文案、微调类指令不含这些词，因此永远判为迭代。 */
+  const TYPE_WORDS = [
+    "作品集", "简历", "portfolio", "咖啡", "餐厅", "cafe", "restaurant", "菜单",
+    "落地页", "landing", "saas", "官网", "看板", "仪表", "dashboard", "大屏",
+    "报表", "博客", "blog", "周刊", "商城", "商店", "shop", "store", "电商",
+    "活动", "会议", "大会", "event", "峰会", "待办", "todo", "计算器", "番茄钟"
+  ];
+  const TYPE_WORD_RE = new RegExp(TYPE_WORDS.join("|"), "i");
+
+  /* 纯微调类指令：这些词出现时，一律当作"在改当前应用"，不做任何模板切换 */
+  const TWEAK_RE = /(再大一点|再大点|大一点|大点|再小一点|小一点|标题|字号|字体|颜色|配色|改成|改为|换成|调成|换成深色|加一个|加上|增加|添加|删除|去掉|去掉|优化|调整|挪|移到|放到|置顶|白改|文案|标题|短一点|精简|更短|更简洁|换一张|对齐|间距|留白|圆角|阴影|居中)/;
+
+  function isNewAppIntent(text, prevMeta) {
+    const t = (text || "").trim();
+    if (!t) return false;
+    if (!prevMeta || !prevMeta.type) return true;      // 没有历史 → 必然是新应用
+
+    // 出现微调信号词 → 优先判为迭代（哪怕句子里也带了类型词，如"菜单改一下"）
+    if (TWEAK_RE.test(t)) return false;
+
+    // 句中确实出现了别的应用类型词 → 换模板
+    const m = analyze(t);
+    const mentionsType = TYPE_WORD_RE.test(t);
+    // 「其实想要 / 干脆 / 不如」这类转折词后接类型词，是明确的换应用意图
+    const turnSignal = /(其实|干脆|不如|改成做|换成做|我想做|我要做|想做|需要|来一个|来个)/.test(t);
+    if (mentionsType && (m.type !== prevMeta.type || turnSignal)) return true;
+
+    // 明确的第一人称新建表达（且没有微调词）
+    if (/(帮我|给我|重新做|换一个|换个新|新建|从头|另外做|重新生成|另做)/.test(t)) return true;
+
+    return false;
+  }
+
   function generate(prompt, prevMeta) {
     const meta = analyze(prompt);
     // inherit refinements lightly when continuing a conversation
@@ -418,5 +452,5 @@ footer{text-align:center;padding:40px 0;color:var(--sub);font-size:13px;border-t
     return { html, meta: next };
   }
 
-  global.Forge = { generate, refine, analyze, PALETTES, TYPE_LABEL };
+  global.Forge = { generate, refine, analyze, isNewAppIntent, PALETTES, TYPE_LABEL };
 })(window);
