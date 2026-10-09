@@ -555,6 +555,9 @@
   }
 
   /* ---------- LLM integration (real model) ---------- */
+  // 云端模型总开关：本演示版默认关闭云端接入，使用内置本地引擎（8 类模板）零配置生成。
+  // 启用真实大模型：把 false 改为 true，并在下方 DEFAULT_SETTINGS 填好 provider/apiKey/model/baseUrl 即可（server.js 的 /api/llm 代理已就绪）。
+  const CLOUD_MODEL_ENABLED = false;
   const PROVIDERS = {
     mimo:     { base: "https://api.xiaomimimo.com/v1", model: "mimo-v2.6-pro-ultraspeed" },
     deepseek: { base: "https://api.deepseek.com/v1", model: "deepseek-chat" },
@@ -564,7 +567,8 @@
     kimi:     { base: "https://api.moonshot.cn/v1", model: "moonshot-v1-8k" },
     custom:   { base: "", model: "" }
   };
-  const DEFAULT_SETTINGS = { provider: "mimo", apiKey: "", model: "mimo-v2.6-pro-ultraspeed", baseUrl: "https://api.xiaomimimo.com/v1" };
+  // 默认不预填云端密钥：关闭云端后走本地引擎；若开启 CLOUD_MODEL_ENABLED，可在此填入密钥
+  const DEFAULT_SETTINGS = { provider: "mimo", apiKey: "", model: "", baseUrl: "" };
   function loadSettings() {
     try {
       const s = JSON.parse(localStorage.getItem("forgeSettings") || "null");
@@ -630,7 +634,7 @@
       return true;
     } catch (e) { return false; }
   }
-  function cloudEnabled() { const s = loadSettings(); return !!(s && s.apiKey && s.baseUrl); }
+  function cloudEnabled() { if (!CLOUD_MODEL_ENABLED) return false; const s = loadSettings(); return !!(s && s.apiKey && s.baseUrl); }
   function buildSystem(refine) {
     let base = refine
       ? "你是 Forge，一个 AI 应用生成器。用户会给你一段当前 HTML 和一个修改要求。请直接返回应用完整、自包含的 HTML（内联 CSS/JS，无外部依赖，响应式，中文内容）。代码保持精简、避免冗长注释与重复结构。只输出 HTML 代码本身，不要任何解释，不要使用 markdown 代码围栏。"
