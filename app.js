@@ -58,8 +58,44 @@
 
   async function checkAuth() {
     const r = await api("/api/auth/me");
-    if (r.ok && r.data && r.data.authAvailable) { me = r.data.user || null; return true; }
+    if (r.ok && r.data && r.data.authAvailable) { me = r.data.user || null; syncState = me ? "saved" : "local"; return true; }
+    // 后端不可用 → 尝试本机账号会话
+    const ls = localSession();
+    if (ls && ls.email) { me = { email: ls.email, name: ls.name }; syncState = "local"; return true; }
     return false;
+  }
+  function localSession() { try { return JSON.parse(localStorage.getItem("forgeLocalSession") || "null"); } catch (e) { return null; } }
+  function localUsers() { try { return JSON.parse(localStorage.getItem("forgeLocalUsers") || "{}"); } catch (e) { return {}; } }
+  // 纯前端账号兜底：无后端（file:// / 离线 / 别人电脑没起服务）时，用 Web Crypto 在本机浏览器注册/登录
+  async function localHash(pw, saltB64) {
+    const enc = new TextEncoder();
+    const salt = saltB64 ? Uint8Array.from(atob(saltB64), (c) => c.charCodeAt(0)) : crypto.getRandomValues(new Uint8Array(16));
+    if (crypto && crypto.subtle) {
+      const key = await crypto.subtle.importKey("raw", enc.encode(pw), "PBKDF2", false, ["deriveBits"]);
+      const bits = await crypto.subtle.deriveBits({ name: "PBKDF2", salt, iterations: 100000, hash: "SHA-256" }, key, 256);
+      const out = btoa(String.fromCharCode.apply(null, new Uint8Array(bits)));
+      const s = saltB64 || btoa(String.fromCharCode.apply(null, salt));
+      return s + "$" + out;
+    }
+    const s = saltB64 || btoa(String.fromCharCode.apply(null, salt)); // 退路：无 Web Crypto 时的弱哈希（仅演示）
+    return s + "$" + btoa(unescape(encodeURIComponent(pw + s)));
+  }
+  async function localAuth(email, pw, name, isReg) {
+    const users = localUsers();
+    if (isReg) {
+      const h = await localHash(pw, null);
+      users[email] = { name: name || email.split("@")[0], salt: h.split("$")[0], hash: h };
+      localStorage.setItem("forgeLocalUsers", JSON.stringify(users));
+    } else {
+      const u = users[email];
+      if (!u) { $("#authMsg").textContent = "本机没有这个账号，切到「注册」建一个"; return false; }
+      const h = await localHash(pw, u.salt);
+      if (h !== u.hash) { $("#authMsg").textContent = "密码不对"; return false; }
+    }
+    const nm = (users[email] && users[email].name) || name || email.split("@")[0];
+    localStorage.setItem("forgeLocalSession", JSON.stringify({ email, name: nm }));
+    me = { email, name: nm }; syncState = "local";
+    return true;
   }
 
   function collectState() {
@@ -172,29 +208,35 @@
     const btn = $("#authSubmit");
     if (!email || !pw) { $("#authMsg").textContent = "邮箱和密码都要填"; return; }
     btn.disabled = true; btn.textContent = "处理中…";
+    const name = $("#authName").value.trim();
     let r;
     if (authTab === "reg") {
-      const name = $("#authName").value.trim() || email.split("@")[0];
       if (pw !== $("#authPw2").value) {
         $("#authMsg").textContent = "两次密码不一致";
         btn.disabled = false; btn.textContent = "注册并进入"; return;
       }
-      r = await api("/api/auth/register", { method: "POST", body: { name, email, password: pw } });
+      r = await api("/api/auth/register", { method: "POST", body: { name: name || email.split("@")[0], email, password: pw } });
     } else {
       r = await api("/api/auth/login", { method: "POST", body: { email, password: pw } });
     }
-    btn.disabled = false; btn.textContent = authTab === "reg" ? "注册并进入" : "登录";
-    if (!r.ok) {
+    let ok = false;
+    if (r.ok) { me = r.data.user; syncState = "saved"; ok = true; }
+    else if (r.status === 0) {
+      // 后端不可达（离线 / file:// / 别人电脑没起服务）→ 本机账号兜底
+      ok = await localAuth(email, pw, name, authTab === "reg");
+    } else {
       $("#authMsg").textContent = (r.data && r.data.error) || "登录失败";
-      return;
     }
-    me = r.data.user;
-    syncState = "saved";
+    btn.disabled = false; btn.textContent = authTab === "reg" ? "注册并进入" : "登录";
+    if (!ok) return;
     enterApp();
-    await pullState();
-    toast("已登录：" + (me.name || me.email));
+    if (me && me.id) { await pullState(); }
+    else if (restoreLast()) { /* 本机账号：沿用上次本地项目 */ }
+    toast("已登录：" + (me.name || me.email) + (syncState === "local" ? "（本机模式）" : ""));
     if (!lastHTML) {
-      addMsg("bot", "登录成功 👋 你的项目简报、版本历史和发布记录都会存在服务端，换台电脑登录就能接着改。");
+      addMsg("bot", syncState === "local"
+        ? "已用<b>本机账号</b>登录，数据存在这台电脑的浏览器里。换成有服务端的部署版登录才能跨设备同步。"
+        : "登录成功 👋 你的项目简报、版本历史和发布记录都会存在服务端，换台电脑登录就能接着改。");
     }
   });
 
@@ -207,6 +249,7 @@
   $("#acctMenu").addEventListener("click", (e) => e.stopPropagation());
   $("#logoutItem").addEventListener("click", async () => {
     await api("/api/auth/logout", { method: "POST" });
+    localStorage.removeItem("forgeLocalSession");
     me = null; syncState = "local";
     $("#acctMenu").hidden = true;
     $("#authGate").classList.remove("gone");
@@ -1170,35 +1213,32 @@
   }
 
   (async function boot() {
-    const hasServer = await checkAuth();
-    if (hasServer && me) {
+    const authed = await checkAuth();   // 后端在线会话 或 本机账号会话
+    if (authed && me && me.id) {
+      // 后端在线用户
       enterApp();
       const restored = await pullState();
-      if (restored) {
-        addMsg("bot", "已从服务端恢复你上次的项目（登录状态下项目、版本和发布记录都存云端）。可以直接继续改，或者发布 / 打开版本历史。");
-      } else if (restoreLast()) {
-        addMsg("bot", "已恢复你上次的项目（本地记录）。可以直接继续改，或者发布 / 打开版本历史。");
-      }
+      addMsg("bot", restored
+        ? "已从服务端恢复你上次的项目（登录状态下项目、版本和发布记录都存云端）。可以直接继续改，或者发布 / 打开版本历史。"
+        : "登录成功 👋 你的项目简报、版本历史和发布记录都会存在服务端，换台电脑登录就能接着改。");
       welcome();
       return;
     }
-    if (hasServer) {
-      // 服务可用但未登录：先走登录页
-      $("#authGate").classList.remove("gone");
-      $("#appShell").hidden = true;
-      renderAcct();
+    if (authed && me && !me.id) {
+      // 本机账号会话（离线 / file://）
+      enterApp();
+      if (restoreLast()) addMsg("bot", "已用<b>本机账号</b>恢复上次项目（数据存在这台电脑的浏览器）。");
       welcome();
       return;
     }
-    // 纯静态打开（没有本地服务）：游客模式
-    if (location.protocol === "file:") {
-      const foot = $("#authFoot");
-      if (foot) foot.innerHTML = "⚠️ 当前是<b>直接双击打开</b>的页面，登录/注册不可用。请关闭后双击「一键启动.bat」启动服务再登录。";
+    if (me && me.id) {
+      // 后端在线但未登录：显示登录页
+      renderAcct(); welcome();
+      return;
     }
-    enterGuest();
-    if (restoreLast()) {
-      addMsg("bot", "已恢复你上次的项目（数据存在本地，关掉浏览器再回来依然在）。");
-    }
-    welcome();
+    // 后端不可用且无本机账号 → 显示登录页，允许本机注册/登录或游客
+    const foot = $("#authFoot");
+    if (foot) foot.innerHTML = "未连接服务端：可<b>注册</b>一个本机账号直接登录（数据存这台电脑浏览器），或点「游客体验」先玩。";
+    renderAcct(); welcome();
   })();
 })();
